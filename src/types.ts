@@ -1,0 +1,30 @@
+import raw from './data/provinces.json';
+import rawAnimals from './data/animals.json';
+import { getMode } from './save';
+
+export interface Province {
+  adcode: string;
+  name: string;
+  display: string;
+  short: string;
+  color: string;
+  /** 以面积质心为原点的轮廓顶点（px，y 向下） */
+  verts: [number, number][];
+  /** 物理碰撞轮廓：重度简化+向凸包收拢，与 verts 同一坐标系 */
+  phys: [number, number][];
+  /** 表情锚点（保证在轮廓内部） */
+  face: [number, number];
+  eyeR: number;
+  /** 包围盒 [宽, 高] */
+  size: [number, number];
+}
+
+export const PROVINCES = raw as unknown as Province[];
+
+/** 叠动物模式的形状集：schema 与省份完全一致（adcode 为 a-* 前缀） */
+export const ANIMALS = rawAnimals as unknown as Province[];
+
+/** 当前全局模式对应的形状集（省份 / 动物） */
+export function activeShapes(): Province[] {
+  return getMode() === 'animal' ? ANIMALS : PROVINCES;
+}

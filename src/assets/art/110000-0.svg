@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#FBEBD6"/>
+  <path d="M84 42 q-6 9 0 17 q6 8 0 16" fill="none" stroke="#C7CDD6" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M112 36 q-6 9 0 17 q6 8 0 16" fill="none" stroke="#C7CDD6" stroke-width="3.4" stroke-linecap="round"/>
+  <ellipse cx="100" cy="150" rx="62" ry="15" fill="#EFE9DE"/>
+  <ellipse cx="100" cy="146" rx="62" ry="14" fill="#FFFFFF"/>
+  <ellipse cx="100" cy="146" rx="50" ry="9" fill="#F6F1E7"/>
+  <ellipse cx="94" cy="118" rx="43" ry="26" fill="#D9813F"/>
+  <circle cx="62" cy="108" r="14" fill="#D9813F"/>
+  <path d="M118 114 Q136 110 136 97 L127 94 Q123 106 112 111 Z" fill="#D9813F"/>
+  <circle cx="137" cy="93" r="12" fill="#D9813F"/>
+  <polygon points="148,90 163,94 148,99" fill="#F2B441"/>
+  <path d="M132 89 Q135 86 138 89" fill="none" stroke="#7A431C" stroke-width="2.4" stroke-linecap="round"/>
+  <ellipse cx="82" cy="106" rx="16" ry="7" fill="#EDA45F" opacity=".85"/>
+  <path d="M76 126 Q95 134 116 125" fill="none" stroke="#B9682B" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="140" cy="102" r="4.2" fill="#F4B9AC"/>
+</svg>

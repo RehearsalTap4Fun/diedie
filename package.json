@@ -1,0 +1,25 @@
+{
+  "name": "diedie-china",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "data": "node tools/build-provinces.mjs",
+    "animals": "node tools/build-animals.mjs",
+    "voice": "node tools/build-voice.mjs",
+    "sfx": "node tools/build-sfx.mjs"
+  },
+  "dependencies": {
+    "phaser": "^3.85.2",
+    "poly-decomp": "^0.3.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.1",
+    "typescript": "^5.6.3",
+    "vite": "^6.3.5",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

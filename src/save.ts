@@ -37,12 +37,30 @@ function fresh(): SaveData {
   return { v: 2, active: 0, profiles: [emptyProfile(), emptyProfile(), emptyProfile()] };
 }
 
+/** 难度合流迁移（2026-08-22 取消小小班）：二选一的老进度并入四选一取较大值 */
+function mergeLevels(d: SaveData): SaveData {
+  for (const p of d.profiles) {
+    if (!p.level) continue;
+    for (const [two, four] of [
+      ['2', '4'],
+      ['a2', 'a4'],
+    ] as const) {
+      if (p.level[two]) {
+        p.level[four] = Math.max(p.level[four] ?? 1, p.level[two]);
+        delete p.level[two];
+      }
+    }
+  }
+  return d;
+}
+
 function load(): SaveData {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const d = JSON.parse(raw);
-      if (d && d.v === 2 && Array.isArray(d.profiles) && d.profiles.length >= 3) return d;
+      if (d && d.v === 2 && Array.isArray(d.profiles) && d.profiles.length >= 3)
+        return mergeLevels(d);
     }
     // v1 迁移：老进度归入 1 号档案
     const old = localStorage.getItem(OLD_KEY);
@@ -51,6 +69,7 @@ function load(): SaveData {
       if (o && o.v === 1) {
         const d = fresh();
         d.profiles[0] = { level: o.level ?? {}, owned: o.owned ?? [] };
+        mergeLevels(d);
         persist(d);
         localStorage.removeItem(OLD_KEY);
         return d;

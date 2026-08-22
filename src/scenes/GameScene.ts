@@ -10,6 +10,14 @@ import { getOwned, addOwned } from '../save';
 import { makeFactCard } from '../ui';
 import { Face } from '../face';
 import { sfx } from '../sfx';
+import {
+  drawSceneBg,
+  drawPlatform,
+  panelRect,
+  cardRect,
+  candyCircle,
+  makeCandyButton,
+} from '../uikit';
 
 const W = 750;
 const H = 1334;
@@ -88,9 +96,12 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    const bg = this.add.graphics();
-    bg.fillGradientStyle(0xa5dff9, 0xa5dff9, 0xe8f7fd, 0xe8f7fd, 1);
-    bg.fillRect(0, 0, W, H);
+    drawSceneBg(this, 0xa9ddf7, 0xfff4e0, {
+      clouds: [
+        [150, 150, 0.8],
+        [590, 240, 0.6],
+      ],
+    });
 
     // 平台（物理 + 视觉），宽度随关卡变窄
     const pw = this.platformW;
@@ -98,22 +109,13 @@ export default class GameScene extends Phaser.Scene {
       isStatic: true,
       friction: 1,
     });
-    const plat = this.add.graphics();
-    plat.fillStyle(0x8d6e63, 1);
-    plat.fillRoundedRect(W / 2 - pw / 2, PLATFORM_Y, pw, 70, 18);
-    plat.fillStyle(0x66bb6a, 1);
-    plat.fillRoundedRect(W / 2 - pw / 2, PLATFORM_Y, pw, 26, {
-      tl: 18,
-      tr: 18,
-      bl: 0,
-      br: 0,
-    });
+    drawPlatform(this, PLATFORM_Y, pw);
 
-    // 目标虚线（随关卡升高）
+    // 目标虚线（随关卡升高）：圆头虚线更柔和
     const line = this.add.graphics();
-    line.lineStyle(6, 0xff6b81, 1);
+    line.fillStyle(0xff8095, 1);
     for (let x = 60; x < W - 60; x += 44) {
-      line.lineBetween(x, this.lineY, x + 24, this.lineY);
+      line.fillRoundedRect(x, this.lineY - 3, 26, 6, 3);
     }
     this.add.text(W - 56, this.lineY - 6, '🚩', { fontSize: '46px' }).setOrigin(1, 1);
     this.add
@@ -121,19 +123,29 @@ export default class GameScene extends Phaser.Scene {
         fontFamily: FONT,
         fontSize: '26px',
         color: '#e05572',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0, 1);
     if (this.level >= 3) speakId('sys-shaky');
     else if (this.level > 1) speakId('sys-higher');
 
     this.header = this.add
-      .text(W / 2, 34, '', { fontFamily: FONT, fontSize: '30px', color: '#4a5568' })
+      .text(W / 2, 34, '', {
+        fontFamily: FONT,
+        fontSize: '30px',
+        color: '#5b4a3f',
+        stroke: '#ffffff',
+        strokeThickness: 4,
+      })
       .setOrigin(0.5, 0);
     this.hint = this.add
       .text(W / 2, AIM_Y + 190, '拖一拖挪位置，松手就放下', {
         fontFamily: FONT,
         fontSize: '30px',
-        color: '#718096',
+        color: '#8a7a6b',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0.5)
       .setVisible(false);
@@ -306,20 +318,18 @@ export default class GameScene extends Phaser.Scene {
       .rectangle(W / 2, H / 2, W, H, 0x2d3748, 0.35)
       .setInteractive(); // 挡住底层输入
     const panel = this.add.graphics();
-    panel.fillStyle(0xfffbea, 1);
-    panel.fillRoundedRect(35, 120, W - 70, 980, 44);
-    panel.lineStyle(8, 0xf6c453, 1);
-    panel.strokeRoundedRect(35, 120, W - 70, 980, 44);
+    panelRect(panel, 35, 120, W - 70, 980, 44);
     const q = this.add
       .text(W / 2, 220, qtext, {
         fontFamily: FONT,
         fontSize: '48px',
         fontStyle: 'bold',
-        color: '#744210',
+        color: '#7a5b2e',
         align: 'center',
         wordWrap: { width: 600 },
       })
       .setOrigin(0.5);
+    q.setShadow(0, 2, 'rgba(122,91,46,0.18)', 2, false, true);
     // 线索题优先显示手绘插画，未覆盖的回退 emoji；认轮廓题显示提示语
     const sub =
       artKey && this.textures.exists(artKey)
@@ -360,10 +370,7 @@ export default class GameScene extends Phaser.Scene {
     const bh = this.choices === 2 ? 400 : 290;
     const c = this.add.container(x, y);
     const g = this.add.graphics();
-    g.fillStyle(0xffffff, 1);
-    g.fillRoundedRect(-bw / 2, -bh / 2, bw, bh, 28);
-    g.lineStyle(6, 0xcbd5e0, 1);
-    g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 28);
+    cardRect(g, 0, 0, bw, bh, 28);
 
     const s = Math.min((bw - 56) / p.size[0], (bh - 56) / p.size[1]);
     const bodyG = this.add.graphics();
@@ -500,10 +507,7 @@ export default class GameScene extends Phaser.Scene {
   private makeRotateBtn(x: number, y: number, glyph: string, delta: number) {
     const c = this.add.container(x, y);
     const g = this.add.graphics();
-    g.fillStyle(0xffffff, 0.95);
-    g.fillCircle(0, 0, 50);
-    g.lineStyle(6, 0x4299e1, 1);
-    g.strokeCircle(0, 0, 50);
+    candyCircle(g, 0, 0, 50, 0xffffff, 0x4aa3ec);
     const t = this.add
       .text(0, -3, glyph, { fontFamily: FONT, fontSize: '54px', color: '#2b6cb0' })
       .setOrigin(0.5);
@@ -523,8 +527,7 @@ export default class GameScene extends Phaser.Scene {
   // ---------- 结算 ----------
 
   private updateHeader() {
-    const mode = this.choices === 2 ? '小小班' : '大大班';
-    this.header.setText(`${mode} · 第 ${this.level} 关 · 已叠 ${this.blocks.length} 块`);
+    this.header.setText(`第 ${this.level} 关 · 已叠 ${this.blocks.length} 块`);
   }
 
   private win() {
@@ -565,18 +568,18 @@ export default class GameScene extends Phaser.Scene {
 
     const c = this.add.container(0, 0).setDepth(90);
     const panel = this.add.graphics();
-    panel.fillStyle(0xfffbea, 0.98);
-    panel.fillRoundedRect(40, 430, W - 80, panelH, 48);
-    panel.lineStyle(10, 0xf6c453, 1);
-    panel.strokeRoundedRect(40, 430, W - 80, panelH, 48);
+    panelRect(panel, 40, 430, W - 80, panelH, 48);
     const t1 = this.add
       .text(W / 2, 550, `🎉 第 ${this.level} 关达成！`, {
         fontFamily: FONT,
         fontSize: '72px',
         fontStyle: 'bold',
-        color: '#d69e2e',
+        color: '#e8a23d',
+        stroke: '#ffffff',
+        strokeThickness: 6,
       })
       .setOrigin(0.5);
+    t1.setShadow(0, 3, 'rgba(122,91,46,0.25)', 4, false, true);
     const nextHigher = this.lineY > LINE_MIN;
     const t2 = this.add
       .text(
@@ -620,7 +623,7 @@ export default class GameScene extends Phaser.Scene {
         this.scene.start(animalMode ? 'dex' : 'map')
       )
     );
-    c.add(this.makeSmallButton(W - 160, btnY, '换难度', 0x4299e1, () => this.scene.start('menu')));
+    c.add(this.makeSmallButton(W - 160, btnY, '回菜单', 0x4299e1, () => this.scene.start('menu')));
   }
 
   private makeSmallButton(
@@ -631,26 +634,6 @@ export default class GameScene extends Phaser.Scene {
     cb: () => void,
     w = 210
   ) {
-    const c = this.add.container(x, y);
-    const g = this.add.graphics();
-    g.fillStyle(color, 1);
-    g.fillRoundedRect(-w / 2, -55, w, 110, 34);
-    g.lineStyle(5, 0xffffff, 0.9);
-    g.strokeRoundedRect(-w / 2, -55, w, 110, 34);
-    const t = this.add
-      .text(0, 0, label, {
-        fontFamily: FONT,
-        fontSize: '36px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
-    c.add([g, t]);
-    c.setSize(w, 110);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => {
-      this.tweens.add({ targets: c, scale: 0.92, duration: 80, yoyo: true, onComplete: cb });
-    });
-    return c;
+    return makeCandyButton(this, x, y, w, 110, label, undefined, color, cb, 36);
   }
 }

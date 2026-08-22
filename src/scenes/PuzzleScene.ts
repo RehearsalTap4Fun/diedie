@@ -4,6 +4,7 @@ import { FONT } from '../draw';
 import { speakId } from '../speak';
 import { getOwned } from '../save';
 import MAP_RAW from '../data/chinamap.json';
+import { drawSceneBg, fancyTitle, panelRect, makeCandyButton } from '../uikit';
 
 interface MapData {
   w: number;
@@ -47,25 +48,21 @@ export default class PuzzleScene extends Phaser.Scene {
     this.pieces = [];
     this.doneCount = 0;
 
-    const bg = this.add.graphics();
-    bg.fillGradientStyle(0xf3ecfb, 0xf3ecfb, 0xe8f7fd, 0xe8f7fd, 1);
-    bg.fillRect(0, 0, W, H);
+    drawSceneBg(this, 0xeae3fa, 0xfdf7ec, {
+      clouds: [
+        [150, 165, 0.6],
+        [610, 135, 0.5],
+      ],
+    });
 
-    this.add
-      .text(W / 2, 90, '省份拼图', {
-        fontFamily: FONT,
-        fontSize: '56px',
-        fontStyle: 'bold',
-        color: '#6b46c1',
-        stroke: '#ffffff',
-        strokeThickness: 8,
-      })
-      .setOrigin(0.5);
+    fancyTitle(this, W / 2, 90, '省份拼图', 56, '#7a5bd0');
     this.add
       .text(W / 2, 152, '把下面的省份拖回它的家', {
         fontFamily: FONT,
         fontSize: '28px',
-        color: '#4a5568',
+        color: '#5b4a3f',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
@@ -268,39 +265,24 @@ export default class PuzzleScene extends Phaser.Scene {
 
     const c = this.add.container(0, 0).setDepth(90);
     const panel = this.add.graphics();
-    panel.fillStyle(0xfffbea, 0.98);
-    panel.fillRoundedRect(75, 760, W - 150, 300, 44);
-    panel.lineStyle(8, 0xf6c453, 1);
-    panel.strokeRoundedRect(75, 760, W - 150, 300, 44);
+    panelRect(panel, 75, 760, W - 150, 300, 44);
     const t = this.add
       .text(W / 2, 850, '🎉 拼好啦！你真棒！', {
         fontFamily: FONT,
         fontSize: '52px',
         fontStyle: 'bold',
-        color: '#d69e2e',
+        color: '#e8a23d',
+        stroke: '#ffffff',
+        strokeThickness: 5,
       })
       .setOrigin(0.5);
+    t.setShadow(0, 3, 'rgba(122,91,46,0.25)', 4, false, true);
     c.add([panel, t]);
     c.add(this.makeButton(W / 2 - 150, 970, '再拼一次', 0x48bb78, () => this.scene.restart()));
     c.add(this.makeButton(W / 2 + 150, 970, '返回', 0x4299e1, () => this.scene.start('menu')));
   }
 
   private makeButton(x: number, y: number, label: string, color: number, cb: () => void) {
-    const c = this.add.container(x, y);
-    const g = this.add.graphics();
-    g.fillStyle(color, 1);
-    g.fillRoundedRect(-130, -52, 260, 104, 32);
-    g.lineStyle(5, 0xffffff, 0.9);
-    g.strokeRoundedRect(-130, -52, 260, 104, 32);
-    const t = this.add
-      .text(0, 0, label, { fontFamily: FONT, fontSize: '38px', fontStyle: 'bold', color: '#ffffff' })
-      .setOrigin(0.5);
-    c.add([g, t]);
-    c.setSize(260, 104);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => {
-      this.tweens.add({ targets: c, scale: 0.92, duration: 80, yoyo: true, onComplete: cb });
-    });
-    return c;
+    return makeCandyButton(this, x, y, 260, 104, label, undefined, color, cb, 38);
   }
 }

@@ -5,6 +5,7 @@ import { speakId } from '../speak';
 import { getOwned } from '../save';
 import { makeFactCard } from '../ui';
 import MAP_RAW from '../data/chinamap.json';
+import { drawSceneBg, fancyTitle, makeCandyButton } from '../uikit';
 
 interface MapData {
   w: number;
@@ -28,25 +29,21 @@ export default class MapScene extends Phaser.Scene {
   create() {
     this.card = undefined;
     this.owned = new Set(getOwned('province'));
-    const bg = this.add.graphics();
-    bg.fillGradientStyle(0xa5dff9, 0xa5dff9, 0xe8f7fd, 0xe8f7fd, 1);
-    bg.fillRect(0, 0, W, 1334);
+    drawSceneBg(this, 0xa9ddf7, 0xf2fbff, {
+      clouds: [
+        [130, 620, 0.6],
+        [620, 700, 0.5],
+      ],
+    });
 
-    this.add
-      .text(W / 2, 110, '我的中国地图', {
-        fontFamily: FONT,
-        fontSize: '60px',
-        fontStyle: 'bold',
-        color: '#2b6cb0',
-        stroke: '#ffffff',
-        strokeThickness: 8,
-      })
-      .setOrigin(0.5);
+    fancyTitle(this, W / 2, 110, '我的中国地图', 60, '#3a7bc8');
     this.add
       .text(W / 2, 180, `已收集 ${this.owned.size} / ${PROVINCES.length} · 点一点亮起来的省份`, {
         fontFamily: FONT,
         fontSize: '28px',
-        color: '#4a5568',
+        color: '#5b4a3f',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
@@ -125,27 +122,9 @@ export default class MapScene extends Phaser.Scene {
     });
 
     // 返回按钮
-    const back = this.add.container(W / 2, 1230);
-    const bgBtn = this.add.graphics();
-    bgBtn.fillStyle(0x4299e1, 1);
-    bgBtn.fillRoundedRect(-160, -52, 320, 104, 34);
-    bgBtn.lineStyle(5, 0xffffff, 0.9);
-    bgBtn.strokeRoundedRect(-160, -52, 320, 104, 34);
-    const bt = this.add
-      .text(0, 0, '返回', { fontFamily: FONT, fontSize: '40px', fontStyle: 'bold', color: '#ffffff' })
-      .setOrigin(0.5);
-    back.add([bgBtn, bt]);
-    back.setSize(320, 104);
-    back.setInteractive({ useHandCursor: true });
-    back.on('pointerdown', () => {
-      this.tweens.add({
-        targets: back,
-        scale: 0.92,
-        duration: 80,
-        yoyo: true,
-        onComplete: () => this.scene.start('menu'),
-      });
-    });
+    makeCandyButton(this, W / 2, 1230, 320, 104, '返回', undefined, 0x4aa3ec, () =>
+      this.scene.start('menu')
+    );
 
     this.add
       .text(W / 2, 1315, '地图基于标准地图改绘 · 仅供学习示意', {

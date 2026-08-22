@@ -46,6 +46,14 @@ export function drawFace(
   const ink = 0x333333;
   const lw = Math.max(2, 3 * scale);
 
+  // 黑眼圈（大熊猫）：先画在眼睛底下，任何表情都保留
+  if (p.patch) {
+    g.fillStyle(0x2f2f2f, 1);
+    for (const side of [-1, 1]) {
+      g.fillEllipse(fx + side * gap * 1.05, fy + r * 0.2, r * 2.5, r * 3.1);
+    }
+  }
+
   if (mood === 'normal' || mood === 'wow') {
     const er = mood === 'wow' ? r * 1.08 : r;
     for (const side of [-1, 1]) {
@@ -68,7 +76,8 @@ export function drawFace(
       }
     }
   } else if (mood === 'blink') {
-    g.lineStyle(lw, ink, 1);
+    // 黑眼圈上的闭眼线条用浅色，否则看不见
+    g.lineStyle(lw, p.patch ? 0xf5f5f5 : ink, 1);
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
       g.beginPath();
@@ -77,7 +86,7 @@ export function drawFace(
     }
   } else {
     // squint：落地瞬间的 > < 眯眼（尖角朝向中间）
-    g.lineStyle(lw, ink, 1);
+    g.lineStyle(lw, p.patch ? 0xf5f5f5 : ink, 1);
     for (const side of [-1, 1]) {
       const ex = fx + side * gap;
       g.beginPath();

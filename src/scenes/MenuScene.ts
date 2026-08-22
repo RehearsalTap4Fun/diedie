@@ -16,6 +16,7 @@ import {
 import { speakId } from '../speak';
 import { installArtTextures } from '../art';
 import { Face } from '../face';
+import { drawSceneBg, fancyTitle, makeCandyButton, candyRect, INK_SOFT } from '../uikit';
 
 const W = 750;
 const H = 1334;
@@ -27,9 +28,7 @@ export default class MenuScene extends Phaser.Scene {
 
   create() {
     installArtTextures(this);
-    const bg = this.add.graphics();
-    bg.fillGradientStyle(0xa5dff9, 0xa5dff9, 0xe8f7fd, 0xe8f7fd, 1);
-    bg.fillRect(0, 0, W, H);
+    drawSceneBg(this, 0xa9ddf7, 0xfff4e0, { sun: true });
 
     // 档案头像行：点头像换小朋友，各自独立进度
     const active = getActiveProfile();
@@ -38,10 +37,12 @@ export default class MenuScene extends Phaser.Scene {
       const x = W / 2 + (i - 1) * 130;
       const c = this.add.container(x, 158);
       const g = this.add.graphics();
-      g.fillStyle(0xffffff, isOn ? 1 : 0.6);
+      g.fillStyle(0x2b3a4a, 0.14);
+      g.fillCircle(0, 7, 46);
+      g.fillStyle(0xffffff, isOn ? 1 : 0.7);
       g.fillCircle(0, 0, 46);
-      g.lineStyle(6, isOn ? 0x48bb78 : 0xcbd5e0, 1);
-      g.strokeCircle(0, 0, 46);
+      g.lineStyle(6, isOn ? 0x5ec97e : 0xdfd8ca, 1);
+      g.strokeCircle(0, 0, 43);
       const t = this.add.text(0, -2, emoji, { fontSize: '46px' }).setOrigin(0.5);
       c.add([g, t]);
       if (isOn) c.setScale(1.12);
@@ -69,22 +70,15 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
-    this.add
-      .text(W / 2, 290, '叠叠中国', {
-        fontFamily: FONT,
-        fontSize: '116px',
-        fontStyle: 'bold',
-        color: '#2b6cb0',
-        stroke: '#ffffff',
-        strokeThickness: 14,
-      })
-      .setOrigin(0.5);
+    fancyTitle(this, W / 2, 290, '叠叠中国', 116, '#3a7bc8');
     const animalMode = getMode() === 'animal';
     this.add
       .text(W / 2, 396, animalMode ? '认一认 · 叠一叠 · 动物朋友' : '认一认 · 叠一叠 · 我们的省份', {
         fontFamily: FONT,
         fontSize: '36px',
-        color: '#4a5568',
+        color: '#5b4a3f',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
@@ -98,7 +92,7 @@ export default class MenuScene extends Phaser.Scene {
       const bodyG = this.add.graphics();
       drawProvince(bodyG, p, s, false);
       const face = new Face(this, p, s, true);
-      const c = this.add.container(170 + i * 205, 585, [bodyG, face.g]);
+      const c = this.add.container(170 + i * 205, 655, [bodyG, face.g]);
       this.tweens.add({
         targets: c,
         y: '+=16',
@@ -110,23 +104,19 @@ export default class MenuScene extends Phaser.Scene {
       });
     });
 
-    const l2 = savedLevel(2);
+    // 单一闯关入口（固定四选一），主 CTA 更大更醒目
     const l4 = savedLevel(4);
-    this.makeButton(
+    makeCandyButton(
+      this,
       W / 2,
-      790,
-      '小小班 · 二选一',
-      l2 > 1 ? `继续第 ${l2} 关` : undefined,
-      0x48bb78,
-      () => this.scene.start('game', { choices: 2, level: l2 })
-    );
-    this.makeButton(
-      W / 2,
-      940,
-      '大大班 · 四选一',
-      l4 > 1 ? `继续第 ${l4} 关` : undefined,
-      0x4299e1,
-      () => this.scene.start('game', { choices: 4, level: l4 })
+      930,
+      520,
+      150,
+      '开始闯关',
+      l4 > 1 ? `继续第 ${l4} 关` : '认一认 · 叠一叠',
+      0x4aa3ec,
+      () => this.scene.start('game', { choices: 4, level: l4 }),
+      52
     );
     this.makeButton(
       W / 2,
@@ -192,11 +182,18 @@ export default class MenuScene extends Phaser.Scene {
     }
 
     this.add
-      .text(hasProgress() ? 460 : W / 2, 1318, '原型版 · 轮廓改绘自标准地图（DataV·GeoAtlas）', {
-        fontFamily: FONT,
-        fontSize: '20px',
-        color: '#718096',
-      })
+      .text(
+        hasProgress() ? 460 : W / 2,
+        1318,
+        animalMode
+          ? '原型版 · 动物剪影来自 PhyloPic（CC0/CC-BY）'
+          : '原型版 · 轮廓改绘自标准地图（DataV·GeoAtlas）',
+        {
+          fontFamily: FONT,
+          fontSize: '20px',
+          color: '#718096',
+        }
+      )
       .setOrigin(0.5);
   }
 
@@ -207,18 +204,21 @@ export default class MenuScene extends Phaser.Scene {
     const h = 72;
     const seg = w / 2;
     const track = this.add.graphics();
-    track.fillStyle(0xffffff, 0.75);
+    track.fillStyle(0x2b3a4a, 0.14);
+    track.fillRoundedRect(W / 2 - w / 2, y - h / 2 + 6, w, h, h / 2);
+    track.fillStyle(0xffffff, 0.9);
     track.fillRoundedRect(W / 2 - w / 2, y - h / 2, w, h, h / 2);
-    track.lineStyle(4, 0xcbd5e0, 1);
+    track.lineStyle(4, 0xe4dccb, 1);
     track.strokeRoundedRect(W / 2 - w / 2, y - h / 2, w, h, h / 2);
     const knob = this.add.graphics();
-    knob.fillStyle(animalMode ? 0x48bb78 : 0x4299e1, 1);
-    knob.fillRoundedRect(
-      W / 2 - w / 2 + (animalMode ? seg : 0) + 4,
-      y - h / 2 + 4,
+    candyRect(
+      knob,
+      W / 2 - w / 2 + (animalMode ? seg : 0) + seg / 2,
+      y,
       seg - 8,
-      h - 8,
-      (h - 8) / 2
+      h - 10,
+      (h - 10) / 2,
+      animalMode ? 0x5ec97e : 0x4aa3ec
     );
     const mk = (x: number, label: string, on: boolean, target: 'province' | 'animal') => {
       this.add
@@ -251,36 +251,6 @@ export default class MenuScene extends Phaser.Scene {
     w = 520
   ) {
     const narrow = w < 400;
-    const c = this.add.container(x, y);
-    const g = this.add.graphics();
-    g.fillStyle(color, 1);
-    g.fillRoundedRect(-w / 2, -64, w, 128, 42);
-    g.lineStyle(6, 0xffffff, 0.9);
-    g.strokeRoundedRect(-w / 2, -64, w, 128, 42);
-    const t = this.add
-      .text(0, sub ? -18 : 0, label, {
-        fontFamily: FONT,
-        fontSize: narrow ? '38px' : sub ? '42px' : '46px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
-    c.add([g, t]);
-    if (sub) {
-      const st = this.add
-        .text(0, 34, sub, {
-          fontFamily: FONT,
-          fontSize: narrow ? '22px' : '27px',
-          color: '#ffffff',
-        })
-        .setOrigin(0.5)
-        .setAlpha(0.92);
-      c.add(st);
-    }
-    c.setSize(w, 128);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => {
-      this.tweens.add({ targets: c, scale: 0.94, duration: 80, yoyo: true, onComplete: cb });
-    });
+    makeCandyButton(this, x, y, w, 128, label, sub, color, cb, narrow ? 38 : sub ? 42 : 46);
   }
 }

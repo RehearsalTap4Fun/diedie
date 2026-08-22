@@ -15,6 +15,8 @@ export interface Province {
   /** 表情锚点（保证在轮廓内部） */
   face: [number, number];
   eyeR: number;
+  /** 眼周黑眼圈（大熊猫）：表情级特征，不改变外形 */
+  patch?: boolean;
   /** 包围盒 [宽, 高] */
   size: [number, number];
 }

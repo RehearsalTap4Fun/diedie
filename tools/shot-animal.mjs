@@ -49,7 +49,17 @@ const targetIsAnimal = await page.evaluate(() => {
   return s?.target?.adcode?.startsWith('a-');
 });
 console.log(`题目为动物: ${targetIsAnimal ? '✅' : '❌'}`);
+// 像真实玩家一样左右交替铺底座（写实动物形状不规则，中心叠罗汉容易滑落）
+const dropAt = async (dx) => {
+  const p0 = px(dx, 400);
+  await page.mouse.move(p0.x, p0.y);
+  await page.mouse.down();
+  await page.waitForTimeout(500);
+  await page.mouse.up();
+};
+const DROP_XS = [375, 345, 405, 360, 390, 375];
 let steps = 0;
+let drops = 0;
 while ((await phase()) !== 'win' && steps < 60) {
   const ph = await phase();
   if (ph === 'quiz') {
@@ -58,8 +68,9 @@ while ((await phase()) !== 'win' && steps < 60) {
       if (await waitPhase(['aim'], 3000)) break;
     }
   } else if (ph === 'aim') {
-    await click(375, 400, 200);
-    await waitPhase(['quiz', 'aim', 'win'], 15000);
+    await dropAt(DROP_XS[drops % DROP_XS.length]);
+    drops++;
+    await waitPhase(['quiz', 'aim', 'win'], 20000);
   } else {
     await page.waitForTimeout(400);
   }

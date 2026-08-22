@@ -5,6 +5,13 @@ import { speakId } from '../speak';
 import { Block, PhysProfile } from '../block';
 import { Face } from '../face';
 import { sfx } from '../sfx';
+import {
+  drawPlatform,
+  panelRect,
+  candyRect,
+  candyCircle,
+  makeCandyButton,
+} from '../uikit';
 
 const W = 750;
 const H = 1334;
@@ -88,27 +95,30 @@ export default class VersusScene extends Phaser.Scene {
 
     // 背景铺到远超屏幕的世界范围：镜头拉远时上方/两侧不露底
     const bg = this.add.graphics();
-    bg.fillStyle(0xffe0e6, 1);
+    bg.fillStyle(0xffdde4, 1);
     bg.fillRect(-1200, -3200, 3150, 3200);
-    bg.fillGradientStyle(0xffe0e6, 0xffe0e6, 0xe8f7fd, 0xe8f7fd, 1);
+    bg.fillGradientStyle(0xffdde4, 0xffdde4, 0xfff4e0, 0xfff4e0, 1);
     bg.fillRect(-1200, 0, 3150, H + 400);
+    // 云朵点缀（世界空间，随镜头缩放有远景感）
+    bg.fillStyle(0xffffff, 0.55);
+    for (const [cx, cy, s] of [
+      [150, 320, 0.8],
+      [600, 480, 0.65],
+      [300, -400, 1.4],
+      [680, -900, 1.2],
+      [80, -1500, 1.5],
+    ]) {
+      bg.fillEllipse(cx, cy, 170 * s, 62 * s);
+      bg.fillEllipse(cx - 58 * s, cy + 12 * s, 104 * s, 46 * s);
+      bg.fillEllipse(cx + 64 * s, cy + 14 * s, 116 * s, 50 * s);
+    }
     this.asWorld(bg);
 
     this.matter.add.rectangle(W / 2, PLATFORM_Y + 45, PLATFORM_W, 90, {
       isStatic: true,
       friction: 1,
     });
-    const plat = this.add.graphics();
-    plat.fillStyle(0x8d6e63, 1);
-    plat.fillRoundedRect(W / 2 - PLATFORM_W / 2, PLATFORM_Y, PLATFORM_W, 70, 18);
-    plat.fillStyle(0x66bb6a, 1);
-    plat.fillRoundedRect(W / 2 - PLATFORM_W / 2, PLATFORM_Y, PLATFORM_W, 26, {
-      tl: 18,
-      tr: 18,
-      bl: 0,
-      br: 0,
-    });
-    this.asWorld(plat);
+    this.asWorld(drawPlatform(this, PLATFORM_Y, PLATFORM_W));
 
     // 顶部双队计分（当前回合队伍放大高亮）+ 中间退出按钮
     TEAMS.forEach((_, i) => this.chips.push(this.makeChip(i)));
@@ -261,18 +271,16 @@ export default class VersusScene extends Phaser.Scene {
     const team = TEAMS[this.cur];
     const c = this.add.container(W / 2, 560).setDepth(70);
     const g = this.add.graphics();
-    g.fillStyle(team.color, 0.96);
-    g.fillRoundedRect(-250, -70, 500, 140, 70);
-    g.lineStyle(8, 0xffffff, 0.9);
-    g.strokeRoundedRect(-250, -70, 500, 140, 70);
+    candyRect(g, 0, 0, 500, 140, 70, team.color);
     const t = this.add
-      .text(0, 0, `${team.emoji} 轮到${team.name}`, {
+      .text(0, -4, `${team.emoji} 轮到${team.name}`, {
         fontFamily: FONT,
         fontSize: '54px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
       .setOrigin(0.5);
+    t.setShadow(0, 3, 'rgba(43,58,74,0.35)', 3, false, true);
     c.add([g, t]);
     c.setScale(0.6);
     this.tweens.add({ targets: c, scale: 1, duration: 260, ease: 'Back.easeOut' });
@@ -410,19 +418,19 @@ export default class VersusScene extends Phaser.Scene {
     this.asUI(c);
     const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x2d3748, 0.3).setInteractive();
     const panel = this.add.graphics();
-    panel.fillStyle(0xfffbea, 0.98);
-    panel.fillRoundedRect(40, 430, W - 80, 480, 48);
-    panel.lineStyle(10, color, 1);
-    panel.strokeRoundedRect(40, 430, W - 80, 480, 48);
+    panelRect(panel, 40, 430, W - 80, 480, 48, color);
     const e = this.add.text(W / 2, 560, emoji, { fontSize: '110px' }).setOrigin(0.5);
     const t1 = this.add
       .text(W / 2, 680, title, {
         fontFamily: FONT,
         fontSize: '68px',
         fontStyle: 'bold',
-        color: '#d69e2e',
+        color: '#e8a23d',
+        stroke: '#ffffff',
+        strokeThickness: 6,
       })
       .setOrigin(0.5);
+    t1.setShadow(0, 3, 'rgba(122,91,46,0.25)', 4, false, true);
     const t2 = this.add
       .text(W / 2, 760, sub, {
         fontFamily: FONT,
@@ -459,7 +467,9 @@ export default class VersusScene extends Phaser.Scene {
     const team = TEAMS[i];
     const c = this.add.container(i === 0 ? 170 : W - 170, 64).setDepth(40);
     const g = this.add.graphics();
-    g.fillStyle(0xffffff, 0.94);
+    g.fillStyle(0x2b3a4a, 0.14);
+    g.fillRoundedRect(-140, -37, 280, 88, 30);
+    g.fillStyle(0xffffff, 0.96);
     g.fillRoundedRect(-140, -44, 280, 88, 30);
     g.lineStyle(6, team.color, 1);
     g.strokeRoundedRect(-140, -44, 280, 88, 30);
@@ -493,12 +503,9 @@ export default class VersusScene extends Phaser.Scene {
   private makeExitBtn() {
     const c = this.add.container(W / 2, 64).setDepth(40);
     const g = this.add.graphics();
-    g.fillStyle(0xffffff, 0.85);
-    g.fillCircle(0, 0, 34);
-    g.lineStyle(4, 0xcbd5e0, 1);
-    g.strokeCircle(0, 0, 34);
+    candyCircle(g, 0, 0, 34, 0xffffff, 0xe4dccb);
     const t = this.add
-      .text(0, -2, '✕', { fontFamily: FONT, fontSize: '34px', color: '#718096' })
+      .text(0, -2, '✕', { fontFamily: FONT, fontSize: '34px', color: '#9a8b7c' })
       .setOrigin(0.5);
     c.add([g, t]);
     c.setSize(68, 68);
@@ -510,10 +517,7 @@ export default class VersusScene extends Phaser.Scene {
   private makeRotateBtn(x: number, y: number, glyph: string, delta: number) {
     const c = this.add.container(x, y);
     const g = this.add.graphics();
-    g.fillStyle(0xffffff, 0.95);
-    g.fillCircle(0, 0, 50);
-    g.lineStyle(6, 0x4299e1, 1);
-    g.strokeCircle(0, 0, 50);
+    candyCircle(g, 0, 0, 50, 0xffffff, 0x4aa3ec);
     const t = this.add
       .text(0, -3, glyph, { fontFamily: FONT, fontSize: '54px', color: '#2b6cb0' })
       .setOrigin(0.5);
@@ -538,26 +542,6 @@ export default class VersusScene extends Phaser.Scene {
     cb: () => void,
     w = 210
   ) {
-    const c = this.add.container(x, y);
-    const g = this.add.graphics();
-    g.fillStyle(color, 1);
-    g.fillRoundedRect(-w / 2, -55, w, 110, 34);
-    g.lineStyle(5, 0xffffff, 0.9);
-    g.strokeRoundedRect(-w / 2, -55, w, 110, 34);
-    const t = this.add
-      .text(0, 0, label, {
-        fontFamily: FONT,
-        fontSize: '36px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      })
-      .setOrigin(0.5);
-    c.add([g, t]);
-    c.setSize(w, 110);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => {
-      this.tweens.add({ targets: c, scale: 0.92, duration: 80, yoyo: true, onComplete: cb });
-    });
-    return c;
+    return makeCandyButton(this, x, y, w, 110, label, undefined, color, cb, 36);
   }
 }

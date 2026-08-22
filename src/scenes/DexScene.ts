@@ -4,12 +4,13 @@ import { drawProvince, FONT } from '../draw';
 import { speakId } from '../speak';
 import { getOwned } from '../save';
 import { makeFactCard } from '../ui';
+import { drawSceneBg, fancyTitle, makeCandyButton, cardRect } from '../uikit';
 
 const W = 750;
-const COLS = 6;
-const CELL = 112;
+const COLS = 5;
+const CELL = 134; // 写实剪影细节多，格子给大一点才认得清
 const GRID_X = (W - COLS * CELL) / 2;
-const GRID_Y = 232;
+const GRID_Y = 222;
 
 /**
  * 动物图鉴（叠动物模式的「我的地图」）：34 格网格，
@@ -25,25 +26,21 @@ export default class DexScene extends Phaser.Scene {
   create() {
     this.card = undefined;
     const owned = new Set(getOwned('animal'));
-    const bg = this.add.graphics();
-    bg.fillGradientStyle(0xd7f2e3, 0xd7f2e3, 0xe8f7fd, 0xe8f7fd, 1);
-    bg.fillRect(0, 0, W, 1334);
+    drawSceneBg(this, 0xc4ecd6, 0xfdf9ec, {
+      clouds: [
+        [140, 165, 0.7],
+        [610, 130, 0.55],
+      ],
+    });
 
-    this.add
-      .text(W / 2, 110, '我的动物图鉴', {
-        fontFamily: FONT,
-        fontSize: '60px',
-        fontStyle: 'bold',
-        color: '#2f855a',
-        stroke: '#ffffff',
-        strokeThickness: 8,
-      })
-      .setOrigin(0.5);
+    fancyTitle(this, W / 2, 110, '我的动物图鉴', 60, '#379a63');
     this.add
       .text(W / 2, 180, `已收集 ${owned.size} / ${ANIMALS.length} · 点一点认识的动物`, {
         fontFamily: FONT,
         fontSize: '28px',
-        color: '#4a5568',
+        color: '#5b4a3f',
+        stroke: '#ffffff',
+        strokeThickness: 4,
       })
       .setOrigin(0.5);
 
@@ -57,27 +54,17 @@ export default class DexScene extends Phaser.Scene {
     });
 
     // 返回按钮（与地图页同款）
-    const back = this.add.container(W / 2, 1230);
-    const bgBtn = this.add.graphics();
-    bgBtn.fillStyle(0x4299e1, 1);
-    bgBtn.fillRoundedRect(-160, -52, 320, 104, 34);
-    bgBtn.lineStyle(5, 0xffffff, 0.9);
-    bgBtn.strokeRoundedRect(-160, -52, 320, 104, 34);
-    const bt = this.add
-      .text(0, 0, '返回', { fontFamily: FONT, fontSize: '40px', fontStyle: 'bold', color: '#ffffff' })
+    makeCandyButton(this, W / 2, 1230, 320, 104, '返回', undefined, 0x4aa3ec, () =>
+      this.scene.start('menu')
+    );
+
+    this.add
+      .text(W / 2, 1315, '动物剪影来自 PhyloPic（CC0/CC-BY，作者见项目 ATTRIBUTION）', {
+        fontFamily: FONT,
+        fontSize: '20px',
+        color: '#718096',
+      })
       .setOrigin(0.5);
-    back.add([bgBtn, bt]);
-    back.setSize(320, 104);
-    back.setInteractive({ useHandCursor: true });
-    back.on('pointerdown', () => {
-      this.tweens.add({
-        targets: back,
-        scale: 0.92,
-        duration: 80,
-        yoyo: true,
-        onComplete: () => this.scene.start('menu'),
-      });
-    });
 
     speakId('sys-dex');
   }
@@ -85,8 +72,7 @@ export default class DexScene extends Phaser.Scene {
   private makeCell(p: Province, cx: number, cy: number, has: boolean) {
     const c = this.add.container(cx, cy);
     const box = this.add.graphics();
-    box.fillStyle(0xffffff, has ? 0.9 : 0.45);
-    box.fillRoundedRect(-CELL / 2 + 5, -CELL / 2 + 5, CELL - 10, CELL - 10, 20);
+    cardRect(box, 0, 0, CELL - 10, CELL - 10, 22, has ? 0.95 : 0.5, has ? 0xe4dccb : 0xffffff);
     const s = Math.min((CELL - 32) / p.size[0], (CELL - 32) / p.size[1]);
     const g = this.add.graphics();
     if (has) {
@@ -120,7 +106,7 @@ export default class DexScene extends Phaser.Scene {
         has ? color : 0xaebbc4,
         has ? undefined : '继续闯关就能收集到啦！'
       );
-      this.card.setPosition(W / 2, 1030).setDepth(60).setScale(0.85);
+      this.card.setPosition(W / 2, 1080).setDepth(60).setScale(0.85);
       this.tweens.add({ targets: this.card, scale: 1, duration: 160, ease: 'Back.easeOut' });
       speakId(has ? `intro-${p.adcode}` : 'sys-locked');
     });

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Province } from './types';
 import { drawProvince, FONT } from './draw';
+import { cardRect } from './uikit';
 import FACTS_RAW from './data/facts.json';
 
 export const FACTS = FACTS_RAW as Record<string, string>;
@@ -20,10 +21,7 @@ export function makeFactCard(
   const bh = 180;
   const c = scene.add.container(0, 0);
   const g = scene.add.graphics();
-  g.fillStyle(0xffffff, 0.82);
-  g.fillRoundedRect(-bw / 2, -bh / 2, bw, bh, 32);
-  g.lineStyle(8, borderColor, 0.9);
-  g.strokeRoundedRect(-bw / 2, -bh / 2, bw, bh, 32);
+  cardRect(g, 0, 0, bw, bh, 32, 0.94, borderColor);
   const shape = scene.add.graphics();
   const s = Math.min(120 / p.size[0], 120 / p.size[1]);
   drawProvince(shape, p, s, true);

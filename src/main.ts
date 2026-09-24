@@ -6,6 +6,7 @@ import MapScene from './scenes/MapScene';
 import PuzzleScene from './scenes/PuzzleScene';
 import VersusScene from './scenes/VersusScene';
 import DexScene from './scenes/DexScene';
+import { setupPWA } from './pwa';
 
 // 省份轮廓是凹多边形，Matter 需要凸分解库才能生成刚体
 (Phaser.Physics.Matter as any).Matter.Common.setDecomp(decomp);
@@ -35,3 +36,5 @@ const game = new Phaser.Game({
 
 // 冒烟测试用：暴露 game 实例供自动化脚本读取场景状态
 (window as any).__game = game;
+
+setupPWA();

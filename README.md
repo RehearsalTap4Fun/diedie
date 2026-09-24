@@ -33,6 +33,18 @@ npm run build   # 类型检查 + 单文件构建（dist/index.html 内联全部�
 菜单可「继续第 N 关」或「重置进度」。注意：微信里发送 HTML 文件是预览模式跑不了，
 电脑传输/AirDrop 后用浏览器打开即可。
 
+## 网页版（PWA，部署到服务器）
+
+`npm run build:web` 产出多文件版 `dist-web/`：语音/音效拆成带哈希的独立文件（首屏只需 HTML + 约 430KB gzip 的 JS），
+service worker 在后台预缓存全部资源（约 9.6MB），首次打开后整站可离线，可「添加到主屏幕」全屏运行。
+单文件版不受影响（`__PWA__` 为 false，不注册 SW、不引用 manifest）。
+
+- 部署：`npm run deploy`（构建 + `tools/deploy.sh` rsync 到服务器）。目标写在根目录 `.deploy.env`（已 gitignore）：
+  `DIEDIE_SSH=<ssh 主机>`、`DIEDIE_PATH=/var/www/diedie`、可选 `DIEDIE_URL=https://<域名或IP>/diedie`
+- 与饮食日记同机：nginx 总站 `location /` 已能兜底访问；缓存规则见 `tools/nginx-diedie.inc`（一次性粘进 `nutri-site.inc`）
+- 存档仍在浏览器 localStorage（键 `diedie-save-v2`），换设备/换浏览器不互通；和同域名下的饮食日记键名不冲突
+- 图标：`npm run icons` 重新生成 `public/icons/`
+
 ## 技术栈
 
 - Vite + TypeScript + Phaser 3（Matter 物理，poly-decomp 凸分解）

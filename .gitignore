@@ -1,6 +1,10 @@
 # 依赖与构建产物（根目录 叠叠中国.html 是随仓库分发的单文件成品，保留跟踪）
 node_modules/
 dist/
+dist-web/
+
+# 部署目标（服务器地址），不入库
+.deploy.env
 
 # 凭证：voiceclone 会话 JWT 缓存，绝不能入库
 tools/.tts-token

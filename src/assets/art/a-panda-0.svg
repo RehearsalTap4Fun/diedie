@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#E9F4E4"/>
+  <rect x="70" y="44" width="17" height="118" rx="8.5" fill="#7DBB6B"/>
+  <line x1="70" y1="76" x2="87" y2="76" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <line x1="70" y1="106" x2="87" y2="106" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <line x1="70" y1="136" x2="87" y2="136" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <rect x="112" y="62" width="15" height="100" rx="7.5" fill="#96CC80"/>
+  <line x1="112" y1="92" x2="127" y2="92" stroke="#6FA85F" stroke-width="3.6" stroke-linecap="round"/>
+  <line x1="112" y1="122" x2="127" y2="122" stroke="#6FA85F" stroke-width="3.6" stroke-linecap="round"/>
+  <ellipse cx="60" cy="38" rx="17" ry="6.5" fill="#8CC37A" transform="rotate(-32 60 38)"/>
+  <ellipse cx="94" cy="32" rx="16" ry="6" fill="#6FA85F" transform="rotate(18 94 32)"/>
+  <ellipse cx="135" cy="52" rx="15" ry="5.6" fill="#8CC37A" transform="rotate(-20 135 52)"/>
+  <ellipse cx="146" cy="76" rx="13" ry="5" fill="#96CC80" transform="rotate(26 146 76)"/>
+</svg>

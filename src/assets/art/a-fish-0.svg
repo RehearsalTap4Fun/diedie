@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#E3EEF7"/>
+  <defs>
+    <clipPath id="swf">
+      <rect x="46" y="48" width="108" height="108" rx="26"/>
+    </clipPath>
+  </defs>
+  <rect x="46" y="48" width="108" height="108" rx="26" fill="#64A8DC"/>
+  <g clip-path="url(#swf)" fill="none" stroke="#A8D4F0" stroke-width="5">
+    <path d="M46 60 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0"/>
+    <path d="M30 88 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0"/>
+    <path d="M46 116 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0"/>
+    <path d="M30 144 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0 a16 16 0 0 0 32 0"/>
+  </g>
+</svg>

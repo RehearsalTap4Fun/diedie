@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PROVINCES, Province, activeShapes } from '../types';
+import { Province, activeShapes } from '../types';
 import { getMode } from '../save';
 import { drawProvince, FONT } from '../draw';
 import { speakId } from '../speak';
@@ -275,10 +275,13 @@ export default class GameScene extends Phaser.Scene {
     this.factUI?.destroy();
     this.factUI = undefined;
     if (this.pool.length === 0) this.refillPool();
-    // 调试钩子：?force=510000-0 时强制目标省份到队首
+    // 调试钩子：?force=<线索ID> 强制目标到队首。线索 ID = {adcode}-{idx}，
+    // 动物 adcode（a-*）本身含连字符，序号只能从尾部拆；仅给 adcode 则只强制目标
     const forceParam = new URLSearchParams(location.search).get('force');
-    if (forceParam) {
-      const t = PROVINCES.find((p) => p.adcode === forceParam.split('-')[0]);
+    const forceMatch = forceParam?.match(/^(.+)-(\d+)$/);
+    const forceAd = forceMatch ? forceMatch[1] : forceParam;
+    if (forceAd) {
+      const t = activeShapes().find((p) => p.adcode === forceAd);
       if (t) this.pool = [t, ...this.pool.filter((p) => p !== t)];
     }
     this.target = this.pool[0];
@@ -294,9 +297,7 @@ export default class GameScene extends Phaser.Scene {
     let artKey: string | undefined;
     let voiceId = `q-name-${this.target.adcode}`;
     const forceIdx =
-      forceParam && forceParam.startsWith(`${this.target.adcode}-`)
-        ? Number(forceParam.split('-')[1])
-        : -1;
+      forceMatch && forceAd === this.target.adcode ? Number(forceMatch[2]) : -1;
     if (
       (this.choices === 4 && clues.length > 0 && Math.random() < 0.45) ||
       (forceIdx >= 0 && clues[forceIdx])

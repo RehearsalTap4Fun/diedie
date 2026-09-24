@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#E3EEF7"/>
+  <defs>
+    <clipPath id="swc">
+      <rect x="46" y="48" width="108" height="108" rx="26"/>
+    </clipPath>
+  </defs>
+  <rect x="46" y="48" width="108" height="108" rx="26" fill="#FFFFFF" stroke="#D5DEE8" stroke-width="3"/>
+  <g clip-path="url(#swc)" fill="#3B3C42">
+    <path d="M40 44 C66 40 78 52 74 70 C70 86 52 90 40 84 Z"/>
+    <path d="M110 46 C134 40 152 50 154 68 C156 84 140 94 124 88 C110 82 104 62 110 46 Z"/>
+    <path d="M62 106 C82 100 96 110 94 128 C92 144 74 150 60 142 C48 134 50 114 62 106 Z"/>
+    <path d="M124 118 C146 114 158 126 156 142 C154 158 136 164 122 156 C112 148 112 128 124 118 Z"/>
+    <path d="M84 152 C98 148 108 154 108 166 L84 166 C76 162 78 154 84 152 Z"/>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#E3F2ED"/>
+  <defs>
+    <clipPath id="swt">
+      <rect x="46" y="48" width="108" height="108" rx="26"/>
+    </clipPath>
+  </defs>
+  <rect x="46" y="48" width="108" height="108" rx="26" fill="#7DBB6B"/>
+  <g clip-path="url(#swt)" fill="#4F8A42">
+    <path d="M100 64 L120 76 L120 100 L100 112 L80 100 L80 76 Z"/>
+    <path d="M140 88 L160 100 L160 124 L140 136 L120 124 L120 100 Z"/>
+    <path d="M60 88 L80 100 L80 124 L60 136 L40 124 L40 100 Z"/>
+    <path d="M100 112 L120 124 L120 148 L100 160 L80 148 L80 124 Z"/>
+    <path d="M100 16 L120 28 L120 52 L100 64 L80 52 L80 28 Z"/>
+    <path d="M140 40 L160 52 L160 76 L140 88 L120 76 L120 52 Z"/>
+    <path d="M60 40 L80 52 L80 76 L60 88 L40 76 L40 52 Z"/>
+    <path d="M140 136 L160 148 L160 172 L140 184 L120 172 L120 148 Z"/>
+    <path d="M60 136 L80 148 L80 172 L60 184 L40 172 L40 148 Z"/>
+  </g>
+</svg>

@@ -15,6 +15,11 @@ import {
   getSoundSettings,
   setSoundOption,
   SoundSettings,
+  getChoices,
+  setChoices,
+  restoreProfile,
+  ProfileSnapshot,
+  PROFILE_NAMES,
 } from '../save';
 import { speakId } from '../speak';
 import { installArtTextures } from '../art';
@@ -24,8 +29,9 @@ import {
   fancyTitle,
   makeCandyButton,
   candyRect,
-  candyCircle,
   panelRect,
+  makeIconButton,
+  showUndoBar,
 } from '../uikit';
 
 const W = 750;
@@ -36,7 +42,7 @@ export default class MenuScene extends Phaser.Scene {
     super('menu');
   }
 
-  create() {
+  create(data?: { undo?: ProfileSnapshot }) {
     installArtTextures(this);
     drawSceneBg(this, 0xa9ddf7, 0xfff4e0, { sun: true });
 
@@ -128,7 +134,7 @@ export default class MenuScene extends Phaser.Scene {
       '开始闯关',
       l4 > 1 ? `继续第 ${l4} 关` : '认一认 · 叠一叠',
       0x4aa3ec,
-      () => this.scene.start('game', { choices: 4, level: l4 }),
+      () => this.scene.start('game', { choices: getChoices(), level: l4 }),
       52
     );
     this.makeButton(
@@ -177,26 +183,10 @@ export default class MenuScene extends Phaser.Scene {
       );
     }
 
-    // 底部一行：重置进度（有进度才显示）靠左，版权脚注居右
-    if (hasProgress()) {
-      const reset = this.add
-        .text(110, 1318, '重置进度', {
-          fontFamily: FONT,
-          fontSize: '26px',
-          color: '#718096',
-        })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
-      reset.on('pointerdown', () => {
-        resetProgress();
-        speakId('sys-reset');
-        this.scene.restart();
-      });
-    }
-
+    // 底部只留版权脚注（重置进度移进家长设置，避免孩子误触）
     this.add
       .text(
-        hasProgress() ? 460 : W / 2,
+        W / 2,
         1318,
         animalMode
           ? '原型版 · 动物剪影来自 PhyloPic（CC0/CC-BY）'
@@ -208,35 +198,30 @@ export default class MenuScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5);
+
+    // 刚重置过：给撤销机会（误操作靠撤销兜底，不做二次确认）
+    if (data?.undo) {
+      const snap = data.undo;
+      showUndoBar(this, `${PROFILE_NAMES[snap.index]}的进度已清空`, () => {
+        restoreProfile(snap);
+        speakId('sys-undo');
+        this.scene.restart();
+      });
+    }
   }
 
   private makeSettingsBtn() {
-    const c = this.add.container(64, 64);
-    const g = this.add.graphics();
-    candyCircle(g, 0, 0, 36, 0xffffff, 0xe4dccb);
-    const t = this.add.text(0, -2, '⚙️', { fontSize: '34px' }).setOrigin(0.5);
-    c.add([g, t]);
-    c.setSize(72, 72);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => {
-      this.tweens.add({
-        targets: c,
-        scale: 0.9,
-        duration: 70,
-        yoyo: true,
-        onComplete: () => this.openSoundSettings(),
-      });
-    });
+    makeIconButton(this, 64, 64, 38, 'gear', () => this.openSettings(), { ring: 0xe4dccb, hit: 116 });
   }
 
-  /** 声音设置面板：四个频道开关，即时保存 */
-  private openSoundSettings() {
+  /** 家长设置面板：四个声音频道开关 + 当前档案的题目难度 + 清空当前档案进度，即时保存 */
+  private openSettings() {
     const c = this.add.container(0, 0).setDepth(120);
     const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x2d3748, 0.4).setInteractive();
     const panel = this.add.graphics();
-    panelRect(panel, 75, 360, 600, 620, 44);
+    panelRect(panel, 60, 200, 630, 1000, 44);
     const title = this.add
-      .text(W / 2, 452, '🔊 声音设置', {
+      .text(W / 2, 290, '家长设置', {
         fontFamily: FONT,
         fontSize: '48px',
         fontStyle: 'bold',
@@ -252,7 +237,7 @@ export default class MenuScene extends Phaser.Scene {
       { key: 'sfx', label: '叠叠音效', sub: '旋转、下落、弹跳、磕碰' },
     ];
     ROWS.forEach((row, i) => {
-      const y = 545 + i * 96;
+      const y = 390 + i * 96;
       const label = this.add.text(125, y - 26, row.label, {
         fontFamily: FONT,
         fontSize: '32px',
@@ -268,9 +253,85 @@ export default class MenuScene extends Phaser.Scene {
       c.add(this.makeToggle(560, y, row.key));
     });
 
+    // 分隔线以下是「当前档案」的设置
+    const who = PROFILE_NAMES[getActiveProfile()];
+    const sep = this.add.graphics();
+    sep.fillStyle(0xe4dccb, 1);
+    sep.fillRoundedRect(110, 772, 530, 4, 2);
+    const whoT = this.add
+      .text(W / 2, 812, `以下只对「${PROFILE_AVATARS[getActiveProfile()]} ${who}」生效`, {
+        fontFamily: FONT,
+        fontSize: '22px',
+        color: '#8a7a6b',
+      })
+      .setOrigin(0.5);
+    const diffT = this.add.text(125, 858, '题目难度', {
+      fontFamily: FONT,
+      fontSize: '32px',
+      fontStyle: 'bold',
+      color: '#5b4a3f',
+    });
+    const diffSub = this.add.text(125, 896, '小一点的孩子选二选一', {
+      fontFamily: FONT,
+      fontSize: '20px',
+      color: '#8a7a6b',
+    });
+    c.add([sep, whoT, diffT, diffSub, this.makeChoiceSeg(528, 884)]);
+
+    if (hasProgress()) {
+      c.add(
+        makeCandyButton(this, W / 2, 1000, 420, 88, `清空${who}的进度`, undefined, 0xe07a6a, () => {
+          const snap = resetProgress();
+          speakId('sys-reset');
+          this.scene.restart({ undo: snap });
+        }, 30)
+      );
+    }
+
     c.add(
-      makeCandyButton(this, W / 2, 918, 260, 96, '好 的', undefined, 0x4aa3ec, () => c.destroy(), 36)
+      makeCandyButton(this, W / 2, 1116, 260, 96, '好 的', undefined, 0x4aa3ec, () => c.destroy(), 36)
     );
+  }
+
+  /** 二选一 / 四选一 分段选择，即点即存 */
+  private makeChoiceSeg(cx: number, cy: number) {
+    const c = this.add.container(cx, cy);
+    const segW = 110;
+    const h = 72;
+    const g = this.add.graphics();
+    const labels: Phaser.GameObjects.Text[] = [];
+    const opts: (2 | 4)[] = [2, 4];
+    const draw = () => {
+      const cur = getChoices();
+      g.clear();
+      g.fillStyle(0x2b3a4a, 0.12);
+      g.fillRoundedRect(-segW, -h / 2 + 5, segW * 2, h, h / 2);
+      g.fillStyle(0xf1ece0, 1);
+      g.fillRoundedRect(-segW, -h / 2, segW * 2, h, h / 2);
+      const i = opts.indexOf(cur);
+      candyRect(g, -segW / 2 + i * segW, 0, segW - 8, h - 10, (h - 10) / 2, 0x5ec97e);
+      labels.forEach((t, k) => t.setColor(k === i ? '#ffffff' : '#8a7a6b'));
+    };
+    opts.forEach((n, k) => {
+      const t = this.add
+        .text(-segW / 2 + k * segW, -2, n === 2 ? '二选一' : '四选一', {
+          fontFamily: FONT,
+          fontSize: '26px',
+          fontStyle: 'bold',
+          color: '#8a7a6b',
+        })
+        .setOrigin(0.5);
+      labels.push(t);
+      const z = this.add.zone(-segW / 2 + k * segW, 0, segW, 100).setInteractive({ useHandCursor: true });
+      z.on('pointerdown', () => {
+        setChoices(n);
+        draw();
+      });
+      c.add(z);
+    });
+    c.add([g, ...labels]);
+    draw();
+    return c;
   }
 
   /** 迷你开关：即点即存，重绘状态 */
@@ -291,7 +352,7 @@ export default class MenuScene extends Phaser.Scene {
     };
     draw();
     c.add(g);
-    c.setSize(110, 66);
+    c.setSize(150, 96);
     c.setInteractive({ useHandCursor: true });
     c.on('pointerdown', () => {
       setSoundOption(key, !getSoundSettings()[key]);
@@ -333,7 +394,8 @@ export default class MenuScene extends Phaser.Scene {
           color: on ? '#ffffff' : '#718096',
         })
         .setOrigin(0.5);
-      const zone = this.add.zone(x, y, seg, h).setInteractive({ useHandCursor: true });
+      // 命中区比胶囊高：手机上胶囊只有约 37pt 高
+      const zone = this.add.zone(x, y, seg, 110).setInteractive({ useHandCursor: true });
       zone.on('pointerdown', () => {
         if (on) return;
         setMode(target);

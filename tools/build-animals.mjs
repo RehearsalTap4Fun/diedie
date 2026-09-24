@@ -23,7 +23,7 @@ const LIST = [
   { id: 'cat', name: '小猫', color: '#FF8A65', px: 200, file: 'cat-81e1f778.svg', face: [0.84, 0.38], er: 12 },
   { id: 'dog', name: '小狗', color: '#BCAAA4', px: 210, file: 'dog-d3e8133c.svg', face: [0.42, 0.12], er: 12 },
   { id: 'rabbit', name: '兔子', color: '#F48FB1', px: 200, file: 'rabbit-d71fcd12.svg', face: [0.3, 0.4], er: 12 },
-  { id: 'panda', name: '大熊猫', color: '#E8EEF2', px: 245, file: 'panda-4b1f7a58.svg', face: [0.3, 0.18], er: 13, patch: true },
+  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-4b1f7a58.svg', face: [0.3, 0.18], er: 13, patch: true },
   { id: 'tiger', name: '老虎', color: '#FFA726', px: 250, file: 'tiger-a02b9a9a.svg', face: [0.13, 0.3], er: 12 },
   { id: 'lion', name: '狮子', color: '#FFCA28', px: 250, file: 'lion-78dbe564.svg', face: [0.14, 0.22], er: 11 },
   { id: 'elephant', name: '大象', color: '#9FA8DA', px: 265, file: 'elephant-910d853a.svg', face: [0.25, 0.3], er: 14 },

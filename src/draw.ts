@@ -12,7 +12,8 @@ export function drawProvince(
 ) {
   const base = Phaser.Display.Color.HexStringToColor(p.color);
   const fill = base.color;
-  const dark = base.clone().darken(22).color;
+  // 大熊猫：暖白身体 + 近黑描边（身份在黑白对比；浅灰描边会像图鉴里「未收集」的灰剪影）
+  const dark = p.patch ? 0x3a3a3a : base.clone().darken(22).color;
   const pts = p.verts.map(([x, y]) => new Phaser.Geom.Point(x * scale, y * scale));
 
   g.fillStyle(fill, 1);

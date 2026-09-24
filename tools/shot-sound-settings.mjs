@@ -38,12 +38,12 @@ const spoken = () => page.evaluate(() => (window.__spoken ?? []).slice());
 await click(64, 64, 800);
 await page.screenshot({ path: `${SHOT_DIR}/40-sound-settings.png` });
 // 关闭「点击播报」（第 3 行 y=737）与「叠叠音效」（第 4 行 y=833）
-await click(560, 737, 400);
-await click(560, 833, 400);
+await click(560, 582, 400);
+await click(560, 678, 400);
 const s1 = await sound();
 console.log(`持久化: ${s1.tap === false && s1.sfx === false ? '✅' : '❌ ' + JSON.stringify(s1)}`);
 await page.screenshot({ path: `${SHOT_DIR}/41-sound-toggled.png` });
-await click(375, 918, 800); // 好的
+await click(375, 1116, 800); // 好的
 
 // 图鉴点击：不应播报（tap 频道已关）
 await page.evaluate(() => { window.__spoken = []; });
@@ -68,8 +68,8 @@ const s2 = await sound();
 console.log(`刷新后保留: ${s2.tap === false && s2.sfx === false ? '✅' : '❌ ' + JSON.stringify(s2)}`);
 // 重新打开面板把两项恢复
 await click(64, 64, 800);
-await click(560, 737, 400);
-await click(560, 833, 400);
+await click(560, 582, 400);
+await click(560, 678, 400);
 const s3 = await sound();
 console.log(`可恢复开启: ${s3.tap === true && s3.sfx === true ? '✅' : '❌ ' + JSON.stringify(s3)}`);
 

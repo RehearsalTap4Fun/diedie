@@ -11,6 +11,8 @@ import {
   candyRect,
   candyCircle,
   makeCandyButton,
+  makeIconButton,
+  showLeaveWindow,
 } from '../uikit';
 
 const W = 750;
@@ -22,6 +24,8 @@ const AIM_SCREEN_Y = 250; // 悬浮块在屏幕上的固定高度（镜头拉远
 const AIM_CLEARANCE = 340; // 悬浮块中心与塔顶的最小间距（留出落块行程）
 const MIN_ZOOM = 0.33;
 const DRAG_MAX_Y = 1140;
+/** 热身块数：开局前几块掉下去不判负，捞回来重放（避免一局几秒就结束） */
+const WARMUP = 2;
 
 const TEAMS = [
   { emoji: '🐼', name: '熊猫队', color: 0x48bb78 },
@@ -62,14 +66,19 @@ export default class VersusScene extends Phaser.Scene {
   private camZ = 1;
   /** 悬浮块的目标世界高度：塔逼近出块区时随塔顶抬升 */
   private aimTargetY = AIM_Y;
+  /** 本局先手队伍：再来一局时交换 */
+  private first = 0;
+  private leaving = false;
 
   constructor() {
     super('versus');
   }
 
-  init() {
+  init(data?: { first?: number }) {
     this.phase = 'banner';
-    this.cur = 0;
+    this.first = data?.first ?? 0;
+    this.cur = this.first;
+    this.leaving = false;
     this.lastDropper = -1;
     this.outcome = null;
     this.placedCount = [0, 0];
@@ -154,8 +163,8 @@ export default class VersusScene extends Phaser.Scene {
     });
 
     // 拖拽用主相机世界坐标（镜头拉远后屏幕坐标≠世界坐标）；底部按钮区判定仍用屏幕坐标
-    this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
-      if (this.phase !== 'aim' || p.y > DRAG_MAX_Y) return;
+    this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
+      if (this.phase !== 'aim' || this.leaving || p.y > DRAG_MAX_Y || over.length) return;
       this.grabbing = true;
       this.moveAim(this.cameras.main.getWorldPoint(p.x, p.y).x);
     });
@@ -185,6 +194,7 @@ export default class VersusScene extends Phaser.Scene {
   }
 
   update(_t: number, dt: number) {
+    if (this.leaving) return;
     // 掉出平台正在坠落的块：惊慌脸 + 成为全塔视线焦点
     let escaping: Block | undefined;
     for (const b of this.blocks) {
@@ -221,12 +231,27 @@ export default class VersusScene extends Phaser.Scene {
       this.aimView.rotation = Phaser.Math.Angle.RotateTo(this.aimView.rotation, this.aimAngle, 0.12);
     }
 
-    // 掉出屏幕即分胜负：最后放块的队伍判负（竞技模式不回收、不宽恕）
+    // 掉出屏幕即分胜负：最后放块的队伍判负；热身阶段（前 WARMUP 块）捞回来重放
     for (let i = this.blocks.length - 1; i >= 0; i--) {
       const b = this.blocks[i];
       if (b.body.position.y > H + 350) {
+        const p = b.province;
         b.destroy(this);
         this.blocks.splice(i, 1);
+        if (this.phase !== 'over' && this.inWarmup()) {
+          this.blocks.forEach((o) => o.gasp());
+          speakId('sys-fall');
+          if (this.phase === 'drop' && this.lastDropper >= 0) {
+            // 同一队重放这一块，不计数
+            this.placedCount[this.lastDropper] = Math.max(0, this.placedCount[this.lastDropper] - 1);
+            this.cur = this.lastDropper;
+            this.updateChips();
+            this.beginAim(p);
+            return;
+          }
+          this.pool.unshift(p);
+          continue;
+        }
         if (this.phase !== 'over' && this.lastDropper >= 0) {
           this.gameOver(this.lastDropper);
           return;
@@ -245,6 +270,10 @@ export default class VersusScene extends Phaser.Scene {
     // 落稳换人
     this.cur = 1 - this.cur;
     this.nextTurn();
+  }
+
+  private inWarmup() {
+    return this.placedCount[0] + this.placedCount[1] <= WARMUP;
   }
 
   // ---------- 回合流转 ----------
@@ -271,9 +300,11 @@ export default class VersusScene extends Phaser.Scene {
     const team = TEAMS[this.cur];
     const c = this.add.container(W / 2, 560).setDepth(70);
     const g = this.add.graphics();
-    candyRect(g, 0, 0, 500, 140, 70, team.color);
+    // 热身阶段横幅多一行说明（给家长看；孩子听「掉下去了，再来一次」就懂）
+    const warm = this.placedCount[0] + this.placedCount[1] < WARMUP;
+    candyRect(g, 0, 0, 500, warm ? 180 : 140, 70, team.color);
     const t = this.add
-      .text(0, -4, `${team.emoji} 轮到${team.name}`, {
+      .text(0, warm ? -24 : -4, `${team.emoji} 轮到${team.name}`, {
         fontFamily: FONT,
         fontSize: '54px',
         fontStyle: 'bold',
@@ -282,6 +313,14 @@ export default class VersusScene extends Phaser.Scene {
       .setOrigin(0.5);
     t.setShadow(0, 3, 'rgba(43,58,74,0.35)', 3, false, true);
     c.add([g, t]);
+    if (warm) {
+      c.add(
+        this.add
+          .text(0, 48, '热身中 · 掉了不算输', { fontFamily: FONT, fontSize: '28px', color: '#ffffff' })
+          .setOrigin(0.5)
+          .setAlpha(0.95)
+      );
+    }
     c.setScale(0.6);
     this.tweens.add({ targets: c, scale: 1, duration: 260, ease: 'Back.easeOut' });
     this.asUI(c);
@@ -358,7 +397,7 @@ export default class VersusScene extends Phaser.Scene {
       this.showResult(
         TEAMS[winner].emoji,
         `${TEAMS[winner].name}赢啦！`,
-        `${TEAMS[loser].emoji} ${TEAMS[loser].name}把塔弄倒了`,
+        `${TEAMS[loser].emoji} ${TEAMS[loser].name}也很棒，下一局加油！`,
         TEAMS[winner].color
       )
     );
@@ -418,7 +457,7 @@ export default class VersusScene extends Phaser.Scene {
     this.asUI(c);
     const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x2d3748, 0.3).setInteractive();
     const panel = this.add.graphics();
-    panelRect(panel, 40, 430, W - 80, 480, 48, color);
+    panelRect(panel, 40, 430, W - 80, 540, 48, color);
     const e = this.add.text(W / 2, 560, emoji, { fontSize: '110px' }).setOrigin(0.5);
     const t1 = this.add
       .text(W / 2, 680, title, {
@@ -442,10 +481,14 @@ export default class VersusScene extends Phaser.Scene {
       .setOrigin(0.5);
     c.add([dim, panel, e, t1, t2]);
     c.add(
-      this.makeSmallButton(230, 850, '再来一局', 0x48bb78, () => this.scene.restart(), 260)
+      makeCandyButton(this, W / 2 - 50, 875, 380, 120, '再来一局', undefined, 0x48bb78,
+        () => this.scene.restart({ first: 1 - this.first }), 42, 'next')
     );
     c.add(
-      this.makeSmallButton(520, 850, '回菜单', 0x4299e1, () => this.scene.start('menu'), 260)
+      makeIconButton(this, W - 150, 875, 54, 'home', () => {
+        speakId('sys-btn-home');
+        this.scene.start('menu');
+      }, { fill: 0x4299e1, icon: 0xffffff })
     );
     e.setScale(0);
     this.tweens.add({ targets: e, scale: 1, duration: 350, ease: 'Back.easeOut' });
@@ -500,18 +543,26 @@ export default class VersusScene extends Phaser.Scene {
     this.chipCounts.forEach((t, i) => t.setText(`已叠 ${this.placedCount[i]} 块`));
   }
 
+  /** 退出：两队卡片中间的小房子，点了先给几秒撤回窗口（孩子会去摸卡片，容易误碰） */
   private makeExitBtn() {
-    const c = this.add.container(W / 2, 64).setDepth(40);
-    const g = this.add.graphics();
-    candyCircle(g, 0, 0, 34, 0xffffff, 0xe4dccb);
-    const t = this.add
-      .text(0, -2, '✕', { fontFamily: FONT, fontSize: '34px', color: '#9a8b7c' })
-      .setOrigin(0.5);
-    c.add([g, t]);
-    c.setSize(68, 68);
-    c.setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => this.scene.start('menu'));
-    return c;
+    return makeIconButton(this, W / 2, 64, 36, 'home', () => this.openLeave(), { ring: 0xe4dccb, hit: 104 }).setDepth(40);
+  }
+
+  private openLeave() {
+    if (this.leaving || this.phase === 'over') return;
+    this.leaving = true;
+    this.grabbing = false;
+    // 只停物理（倒计时本身靠场景计时器，不能停）；回合横幅到点照常进入放块，放块阶段本就等人操作
+    this.matter.world.pause();
+    showLeaveWindow(
+      this,
+      () => this.scene.start('menu'),
+      () => {
+        this.leaving = false;
+        this.matter.world.resume();
+      },
+      { register: (o) => this.asUI(o) }
+    );
   }
 
   private makeRotateBtn(x: number, y: number, glyph: string, delta: number) {
@@ -532,16 +583,5 @@ export default class VersusScene extends Phaser.Scene {
     });
     c.setVisible(false);
     return c;
-  }
-
-  private makeSmallButton(
-    x: number,
-    y: number,
-    label: string,
-    color: number,
-    cb: () => void,
-    w = 210
-  ) {
-    return makeCandyButton(this, x, y, w, 110, label, undefined, color, cb, 36);
   }
 }

@@ -31,6 +31,8 @@ interface ProfileData {
   owned: string[];
   /** 已收集的动物 adcode（a-*），旧存档没有该字段，读取处 ?? [] 兜底 */
   ownedA?: string[];
+  /** 题目选项数（家长按档案设置，给小龄孩子开二选一），缺省四选一。关卡进度两种难度共用 */
+  choices?: 2 | 4;
 }
 
 interface SaveData {
@@ -195,9 +197,34 @@ export function hasProgress(): boolean {
   );
 }
 
-/** 只重置当前档案，不影响其他小朋友 */
-export function resetProgress() {
+/** 只重置当前档案，不影响其他小朋友。返回重置前的快照，供撤销用；难度设置保留 */
+export function resetProgress(): { index: number; data: ProfileData } {
   const d = load();
-  d.profiles[d.active] = emptyProfile();
+  const before = cur(d);
+  const snap = { index: d.active, data: JSON.parse(JSON.stringify(before)) as ProfileData };
+  d.profiles[d.active] = { ...emptyProfile(), choices: before.choices };
+  persist(d);
+  return snap;
+}
+
+/** 撤销重置：把快照写回原档案 */
+export function restoreProfile(snap: { index: number; data: ProfileData }) {
+  const d = load();
+  if (!d.profiles[snap.index]) return;
+  d.profiles[snap.index] = snap.data;
+  persist(d);
+}
+
+export type ProfileSnapshot = ReturnType<typeof resetProgress>;
+
+// ---------- 难度（按档案） ----------
+
+export function getChoices(): 2 | 4 {
+  return cur(load()).choices === 2 ? 2 : 4;
+}
+
+export function setChoices(n: 2 | 4) {
+  const d = load();
+  cur(d).choices = n;
   persist(d);
 }

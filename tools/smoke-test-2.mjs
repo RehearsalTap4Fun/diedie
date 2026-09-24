@@ -75,16 +75,16 @@ await page.screenshot({ path: `${SHOT_DIR}/5-final.png` });
 console.log(`第 1 关: ${r1.ph}（${r1.steps} 步）`);
 
 // 过关后点「下一关」，校验关卡与目标线递进
-// 胜利面板有单排（按钮 y=825）/双排（y=895）两种布局，先后尝试
+// 胜利面板有单排（按钮 y=800）/双排（y=875），「下一关」居中两种布局，先后尝试
 let level2ok = false;
 if (r1.ph === 'win') {
-  await click(160, 825, 1200);
+  await click(375, 800, 1200);
   let st = await page.evaluate(() => {
     const s = window.__game.scene.getScene('game');
     return { level: s.level, lineY: s.lineY, platformW: s.platformW, phase: s.phase };
   });
   if (st.level !== 2) {
-    await click(160, 895, 1500);
+    await click(375, 875, 1500);
     st = await page.evaluate(() => {
       const s = window.__game.scene.getScene('game');
       return { level: s.level, lineY: s.lineY, platformW: s.platformW, phase: s.phase };

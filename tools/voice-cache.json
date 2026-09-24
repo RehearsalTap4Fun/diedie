@@ -481,5 +481,9 @@
   "clue-a-crab-0": "vc886|谁挥着大钳子，横着走路呀？",
   "clue-a-dino-0": "vc886|这是谁的脚印呀？",
   "clue-a-croc-0": "vc886|谁的嘴巴大大，牙齿尖尖呀？",
-  "clue-a-mouse-0": "vc886|谁最爱偷吃奶酪呀？"
+  "clue-a-mouse-0": "vc886|谁最爱偷吃奶酪呀？",
+  "sys-leave": "vc886|要回菜单啦！还想玩，就点绿色的按钮",
+  "sys-btn-home": "vc886|回菜单啦",
+  "sys-btn-next": "vc886|下一关，出发！",
+  "sys-undo": "vc886|好的，恢复啦！"
 }

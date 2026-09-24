@@ -49,6 +49,11 @@ const lines = {
   'sys-mode-province': '来叠我们的省份啦！',
   'sys-mode-animal': '来叠动物朋友啦！',
   'sys-dex': '看看我的动物图鉴！',
+  // 图标按钮念名（孩子不识字，靠听认按钮）
+  'sys-btn-next': '下一关，出发！',
+  'sys-btn-home': '回菜单啦',
+  'sys-leave': '要回菜单啦！还想玩，就点绿色的按钮',
+  'sys-undo': '好的，恢复啦！',
 };
 for (const p of provinces) {
   lines[`q-name-${p.adcode}`] = `找一找，${p.display}在哪里？`;

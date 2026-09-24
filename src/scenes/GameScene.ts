@@ -17,6 +17,8 @@ import {
   cardRect,
   candyCircle,
   makeCandyButton,
+  makeIconButton,
+  showLeaveWindow,
 } from '../uikit';
 
 const W = 750;
@@ -57,6 +59,10 @@ export default class GameScene extends Phaser.Scene {
   private rotateBtns: Phaser.GameObjects.Container[] = [];
   private header!: Phaser.GameObjects.Text;
   private hint!: Phaser.GameObjects.Text;
+  /** 当前题目的语音 ID（重播按钮用） */
+  private quizVoice = '';
+  /** 退出撤回窗口打开中：物理暂停、不结算、不接收拖动 */
+  private leaving = false;
 
   constructor() {
     super('game');
@@ -93,6 +99,8 @@ export default class GameScene extends Phaser.Scene {
     this.grabbing = false;
     this.settleMs = 0;
     this.rotateBtns = [];
+    this.quizVoice = '';
+    this.leaving = false;
   }
 
   create() {
@@ -127,8 +135,9 @@ export default class GameScene extends Phaser.Scene {
         strokeThickness: 4,
       })
       .setOrigin(0, 1);
-    if (this.level >= 3) speakId('sys-shaky');
-    else if (this.level > 1) speakId('sys-higher');
+    // 排队：等「下一关，出发！」念完再提示
+    if (this.level >= 3) speakId('sys-shaky', { queue: true });
+    else if (this.level > 1) speakId('sys-higher', { queue: true });
 
     this.header = this.add
       .text(W / 2, 34, '', {
@@ -177,8 +186,12 @@ export default class GameScene extends Phaser.Scene {
       }
     });
 
-    this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
-      if (this.phase !== 'aim' || p.y > DRAG_MAX_Y) return;
+    // 退出：左上角小房子，点了先给几秒撤回窗口（孩子误碰不至于丢掉当前这座塔）
+    makeIconButton(this, 64, 64, 40, 'home', () => this.openLeave(), { ring: 0xe4dccb }).setDepth(70);
+
+    this.input.on('pointerdown', (p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]) => {
+      // 按在按钮上（小房子/旋转等）不算抓块
+      if (this.phase !== 'aim' || this.leaving || p.y > DRAG_MAX_Y || over.length) return;
       this.grabbing = true;
       this.moveAim(p.x);
     });
@@ -198,6 +211,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(_t: number, dt: number) {
+    if (this.leaving) return;
     // 掉出平台正在坠落的块：自己换惊慌脸，并成为全塔视线焦点（任何阶段生效）
     let escaping: Block | undefined;
     for (const b of this.blocks) {
@@ -258,6 +272,21 @@ export default class GameScene extends Phaser.Scene {
     else this.startQuiz();
   }
 
+  private openLeave() {
+    if (this.leaving) return;
+    this.leaving = true;
+    this.grabbing = false;
+    this.matter.world.pause();
+    showLeaveWindow(
+      this,
+      () => this.scene.start('menu'),
+      () => {
+        this.leaving = false;
+        this.matter.world.resume();
+      }
+    );
+  }
+
   // ---------- 答题 ----------
 
   private refillPool() {
@@ -308,6 +337,7 @@ export default class GameScene extends Phaser.Scene {
       artKey = `art-${this.target.adcode}-${idx}`;
       voiceId = `clue-${this.target.adcode}-${idx}`;
     }
+    this.quizVoice = voiceId;
     this.quizUI = this.buildQuizPanel(options, qtext, emoji, artKey);
     // 排队播放：等关卡提示（要叠得更高哦）或上一条反馈播完，避免互相打断
     speakId(voiceId, { queue: true });
@@ -331,26 +361,30 @@ export default class GameScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     q.setShadow(0, 2, 'rgba(122,91,46,0.18)', 2, false, true);
-    // 线索题优先显示手绘插画，未覆盖的回退 emoji；认轮廓题显示提示语
-    const sub =
+    // 不识字的孩子全靠听：题干、插画、喇叭都能点着重听一遍
+    const replay = () => speakId(this.quizVoice);
+    q.setInteractive({ useHandCursor: true }).on('pointerdown', replay);
+    c.add([dim, panel, q]);
+    // 线索题优先显示手绘插画（回退 emoji），右下角挂小喇叭；认轮廓题只放一个大喇叭
+    const pic =
       artKey && this.textures.exists(artKey)
         ? this.add.image(W / 2, 342, artKey).setDisplaySize(150, 150)
         : emoji
           ? this.add.text(W / 2, 350, emoji, { fontSize: '96px' }).setOrigin(0.5)
-          : this.add
-              .text(W / 2, 330, '🔊 答对了就能拿到它哦', {
-                fontFamily: FONT,
-                fontSize: '30px',
-                color: '#a0793d',
-              })
-              .setOrigin(0.5);
-    c.add([dim, panel, q, sub]);
+          : undefined;
+    if (pic) {
+      pic.setInteractive({ useHandCursor: true }).on('pointerdown', replay);
+      c.add(pic);
+      c.add(makeIconButton(this, W / 2 + 112, 292, 32, 'speaker', replay, { fill: 0x4aa3ec, icon: 0xffffff, hit: 100 }));
+    } else {
+      c.add(makeIconButton(this, W / 2, 345, 52, 'speaker', replay, { fill: 0x4aa3ec, icon: 0xffffff }));
+    }
 
     const slots: [number, number][] =
       this.choices === 2
         ? [
-            [W / 2 - 170, 700],
-            [W / 2 + 170, 700],
+            [W / 2 - 160, 690],
+            [W / 2 + 160, 690],
           ]
         : [
             [W / 2 - 165, 560],
@@ -367,8 +401,8 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private buildOption(p: Province, x: number, y: number) {
-    const bw = this.choices === 2 ? 320 : 300;
-    const bh = this.choices === 2 ? 400 : 290;
+    const bw = this.choices === 2 ? 290 : 300;
+    const bh = this.choices === 2 ? 380 : 290;
     const c = this.add.container(x, y);
     const g = this.add.graphics();
     cardRect(g, 0, 0, bw, bh, 28);
@@ -533,7 +567,8 @@ export default class GameScene extends Phaser.Scene {
 
   private win() {
     this.phase = 'win';
-    saveLevel(this.choices, this.level + 1);
+    // 关卡进度两种难度共用（二选一只是给小龄孩子降低答题难度）
+    saveLevel(4, this.level + 1);
     // 收集本关叠过的省份，点亮地图
     const stacked = [...new Set(this.blocks.map((b) => b.province.adcode))];
     const ownedBefore = new Set(getOwned());
@@ -565,7 +600,7 @@ export default class GameScene extends Phaser.Scene {
     const spacing = size + 14;
     const panelH = rows === 2 ? 540 : 470;
     const shapeY0 = rows === 2 ? 690 : 710;
-    const btnY = rows === 2 ? 895 : 825;
+    const btnY = rows === 2 ? 875 : 800;
 
     const c = this.add.container(0, 0).setDepth(90);
     const panel = this.add.graphics();
@@ -613,28 +648,25 @@ export default class GameScene extends Phaser.Scene {
       this.tweens.add({ targets: g, scale: 1, delay: 200 + i * 110, duration: 260, ease: 'Back.easeOut' });
       c.add(g);
     });
-    c.add(
-      this.makeSmallButton(160, btnY, '下一关', 0x48bb78, () =>
-        this.scene.restart({ choices: this.choices, level: this.level + 1 })
-      )
-    );
+    // 只有一个主按钮：「下一关」大且会轻轻呼吸；地图/菜单退成两侧的图标圆钮
+    const goNext = () => {
+      speakId('sys-btn-next');
+      this.scene.restart({ choices: this.choices, level: this.level + 1 });
+    };
+    const next = makeCandyButton(this, 0, 0, 340, 124, '下一关', undefined, 0x48bb78, goNext, 44, 'next');
+    const pulse = this.add.container(W / 2, btnY, [next]);
+    this.tweens.add({ targets: pulse, scale: 1.06, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 900 });
     const animalMode = getMode() === 'animal';
-    c.add(
-      this.makeSmallButton(W / 2, btnY, animalMode ? '动物图鉴' : '我的地图', 0xf6ad55, () =>
-        this.scene.start(animalMode ? 'dex' : 'map')
-      )
-    );
-    c.add(this.makeSmallButton(W - 160, btnY, '回菜单', 0x4299e1, () => this.scene.start('menu')));
-  }
-
-  private makeSmallButton(
-    x: number,
-    y: number,
-    label: string,
-    color: number,
-    cb: () => void,
-    w = 210
-  ) {
-    return makeCandyButton(this, x, y, w, 110, label, undefined, color, cb, 36);
+    c.add([
+      pulse,
+      makeIconButton(this, 128, btnY, 54, animalMode ? 'dex' : 'map', () => this.scene.start(animalMode ? 'dex' : 'map'), {
+        fill: 0xf6ad55,
+        icon: 0xffffff,
+      }),
+      makeIconButton(this, W - 128, btnY, 54, 'home', () => {
+        speakId('sys-btn-home');
+        this.scene.start('menu');
+      }, { fill: 0x4299e1, icon: 0xffffff }),
+    ]);
   }
 }

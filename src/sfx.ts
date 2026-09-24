@@ -2,6 +2,8 @@
  * 音效播放：tools/build-sfx.mjs 生成的短音效（单文件构建时内联为 data URI）。
  * 与语音（speak.ts）互不打断；音效之间允许叠放；同名音效做最小间隔节流。
  */
+import { getSoundSettings } from './save';
+
 const files = import.meta.glob('./assets/sfx/*.m4a', {
   eager: true,
   query: '?url',
@@ -24,6 +26,7 @@ const VOLUMES: Record<string, number> = {
 const lastPlay: Record<string, number> = {};
 
 export function sfx(id: string, minGapMs = 120) {
+  if (!getSoundSettings().sfx) return; // 音效已被家长关闭
   const url = byId[id];
   if (!url) return;
   const now = Date.now();

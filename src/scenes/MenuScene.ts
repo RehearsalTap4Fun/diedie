@@ -12,11 +12,21 @@ import {
   PROFILE_AVATARS,
   getMode,
   setMode,
+  getSoundSettings,
+  setSoundOption,
+  SoundSettings,
 } from '../save';
 import { speakId } from '../speak';
 import { installArtTextures } from '../art';
 import { Face } from '../face';
-import { drawSceneBg, fancyTitle, makeCandyButton, candyRect, INK_SOFT } from '../uikit';
+import {
+  drawSceneBg,
+  fancyTitle,
+  makeCandyButton,
+  candyRect,
+  candyCircle,
+  panelRect,
+} from '../uikit';
 
 const W = 750;
 const H = 1334;
@@ -69,6 +79,9 @@ export default class MenuScene extends Phaser.Scene {
         this.scene.restart();
       });
     });
+
+    // 声音设置入口（家长用，左上角避开头像行）
+    this.makeSettingsBtn();
 
     fancyTitle(this, W / 2, 290, '叠叠中国', 116, '#3a7bc8');
     const animalMode = getMode() === 'animal';
@@ -195,6 +208,97 @@ export default class MenuScene extends Phaser.Scene {
         }
       )
       .setOrigin(0.5);
+  }
+
+  private makeSettingsBtn() {
+    const c = this.add.container(64, 64);
+    const g = this.add.graphics();
+    candyCircle(g, 0, 0, 36, 0xffffff, 0xe4dccb);
+    const t = this.add.text(0, -2, '⚙️', { fontSize: '34px' }).setOrigin(0.5);
+    c.add([g, t]);
+    c.setSize(72, 72);
+    c.setInteractive({ useHandCursor: true });
+    c.on('pointerdown', () => {
+      this.tweens.add({
+        targets: c,
+        scale: 0.9,
+        duration: 70,
+        yoyo: true,
+        onComplete: () => this.openSoundSettings(),
+      });
+    });
+  }
+
+  /** 声音设置面板：四个频道开关，即时保存 */
+  private openSoundSettings() {
+    const c = this.add.container(0, 0).setDepth(120);
+    const dim = this.add.rectangle(W / 2, H / 2, W, H, 0x2d3748, 0.4).setInteractive();
+    const panel = this.add.graphics();
+    panelRect(panel, 75, 360, 600, 620, 44);
+    const title = this.add
+      .text(W / 2, 452, '🔊 声音设置', {
+        fontFamily: FONT,
+        fontSize: '48px',
+        fontStyle: 'bold',
+        color: '#7a5b2e',
+      })
+      .setOrigin(0.5);
+    c.add([dim, panel, title]);
+
+    const ROWS: { key: keyof SoundSettings; label: string; sub: string }[] = [
+      { key: 'quiz', label: '答题语音', sub: '题目播报、答对答错反馈' },
+      { key: 'hint', label: '提示语音', sub: '过关庆祝、关卡提示、竞技拼图' },
+      { key: 'tap', label: '点击播报', sub: '图鉴、地图、菜单的点按介绍' },
+      { key: 'sfx', label: '叠叠音效', sub: '旋转、下落、弹跳、磕碰' },
+    ];
+    ROWS.forEach((row, i) => {
+      const y = 545 + i * 96;
+      const label = this.add.text(125, y - 26, row.label, {
+        fontFamily: FONT,
+        fontSize: '32px',
+        fontStyle: 'bold',
+        color: '#5b4a3f',
+      });
+      const sub = this.add.text(125, y + 12, row.sub, {
+        fontFamily: FONT,
+        fontSize: '20px',
+        color: '#8a7a6b',
+      });
+      c.add([label, sub]);
+      c.add(this.makeToggle(560, y, row.key));
+    });
+
+    c.add(
+      makeCandyButton(this, W / 2, 918, 260, 96, '好 的', undefined, 0x4aa3ec, () => c.destroy(), 36)
+    );
+  }
+
+  /** 迷你开关：即点即存，重绘状态 */
+  private makeToggle(x: number, y: number, key: keyof SoundSettings) {
+    const c = this.add.container(x, y);
+    const g = this.add.graphics();
+    const draw = () => {
+      const on = getSoundSettings()[key];
+      g.clear();
+      g.fillStyle(0x2b3a4a, 0.14);
+      g.fillRoundedRect(-48, -21, 96, 52, 26);
+      g.fillStyle(on ? 0x5ec97e : 0xd8d2c6, 1);
+      g.fillRoundedRect(-48, -26, 96, 52, 26);
+      g.fillStyle(0x2b3a4a, 0.12);
+      g.fillCircle(on ? 22 : -22, 3, 20);
+      g.fillStyle(0xffffff, 1);
+      g.fillCircle(on ? 22 : -22, 0, 20);
+    };
+    draw();
+    c.add(g);
+    c.setSize(110, 66);
+    c.setInteractive({ useHandCursor: true });
+    c.on('pointerdown', () => {
+      setSoundOption(key, !getSoundSettings()[key]);
+      draw();
+      this.tweens.add({ targets: c, scale: 0.9, duration: 60, yoyo: true });
+    });
+    return c;
   }
 
   /** 模式切换胶囊：叠省份 | 叠动物，点未选中的一侧切换并重进菜单 */

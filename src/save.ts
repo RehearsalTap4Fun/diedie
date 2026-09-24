@@ -12,6 +12,18 @@ export const PROFILE_NAMES = ['熊猫宝宝', '老虎宝宝', '孔雀宝宝'];
 /** 全局玩法模式：叠省份 / 叠动物 */
 export type GameMode = 'province' | 'animal';
 
+/** 声音分频道开关（全局，家长设置面板用），默认全开 */
+export interface SoundSettings {
+  /** 答题语音：题目播报、答对/答错反馈 */
+  quiz: boolean;
+  /** 提示语音：过关/掉落/关卡提示、竞技回合、拼图 */
+  hint: boolean;
+  /** 点击播报：图鉴/地图点击介绍、菜单头像与模式切换等 */
+  tap: boolean;
+  /** 叠叠音效：旋转/下落/弹跳/磕碰 */
+  sfx: boolean;
+}
+
 interface ProfileData {
   /** 每种难度各自到达的关卡；键 = 选项数，动物模式加前缀 a（'2'/'4'/'a2'/'a4'） */
   level: Record<string, number>;
@@ -27,6 +39,8 @@ interface SaveData {
   profiles: ProfileData[];
   /** 全局模式（三档案共用），旧存档没有该字段视作省份模式 */
   mode?: GameMode;
+  /** 声音开关（三档案共用），缺省视作全开 */
+  sound?: Partial<SoundSettings>;
 }
 
 function emptyProfile(): ProfileData {
@@ -122,6 +136,19 @@ export function getMode(): GameMode {
 export function setMode(m: GameMode) {
   const d = load();
   d.mode = m;
+  persist(d);
+}
+
+// ---------- 声音设置 ----------
+
+export function getSoundSettings(): SoundSettings {
+  const s = load().sound ?? {};
+  return { quiz: s.quiz ?? true, hint: s.hint ?? true, tap: s.tap ?? true, sfx: s.sfx ?? true };
+}
+
+export function setSoundOption(key: keyof SoundSettings, on: boolean) {
+  const d = load();
+  d.sound = { ...(d.sound ?? {}), [key]: on };
   persist(d);
 }
 

@@ -6,6 +6,17 @@
  * 不能触发兜底——否则会出现合成音与音频双声重叠。
  */
 import VOICE_TEXT from './data/voice.json';
+import { getSoundSettings } from './save';
+
+/** 语音分频道（按 ID 前缀集中归类，供设置面板分别开关）：
+ *  quiz = 题目/对错反馈；tap = 图鉴地图菜单的点击播报；hint = 其余提示/庆祝/竞技/拼图 */
+function channelOf(id: string): 'quiz' | 'tap' | 'hint' {
+  if (/^(q-name-|clue-|fact-)/.test(id) || id === 'sys-correct' || id === 'sys-wrong')
+    return 'quiz';
+  if (/^intro-/.test(id) || /^sys-(locked|map|dex|prof-\d|mode-\w+|puzzle-locked|reset)$/.test(id))
+    return 'tap';
+  return 'hint';
+}
 
 const files = import.meta.glob('./assets/voice/*.m4a', {
   eager: true,
@@ -24,6 +35,11 @@ let queued: (() => void) | null = null;
 
 /** 按文案 ID 播放。queue: true 时等当前语音播完再播（只保留最新一条排队） */
 export function speakId(id: string, opts?: { queue?: boolean }) {
+  if (!getSoundSettings()[channelOf(id)]) return; // 该频道已被家长关闭
+  // 实际播放意图记录（自动化测试断言用，环形保留最近 200 条）
+  const log: string[] = ((window as any).__spoken ??= []);
+  log.push(id);
+  if (log.length > 200) log.shift();
   const url = byId[id];
   const text = (VOICE_TEXT as Record<string, string>)[id];
   if (!url) {

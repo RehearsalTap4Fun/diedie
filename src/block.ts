@@ -43,21 +43,20 @@ export class Block {
     this.province = p;
     const Matter = (Phaser.Physics.Matter as any).Matter;
     const verts = p.phys.map(([vx, vy]) => ({ x: vx, y: vy }));
-    const body = Matter.Bodies.fromVertices(
-      x,
-      y,
-      [verts],
-      {
-        friction: prof.friction,
-        frictionStatic: prof.frictionStatic,
-        restitution: 0,
-        frictionAir: 0.02,
-        sleepThreshold: prof.sleepThreshold,
-      },
-      true,
-      0.01,
-      10
-    );
+    const opts = {
+      friction: prof.friction,
+      frictionStatic: prof.frictionStatic,
+      restitution: 0,
+      frictionAir: 0.02,
+      sleepThreshold: prof.sleepThreshold,
+    };
+    let body = Matter.Bodies.fromVertices(x, y, [verts], opts, true, 0.01, 10);
+    // 保险：轮廓自交时凸分解失败，Matter 会退化成一个远小于轮廓的碎片刚体（曾导致奶牛穿过平台、
+    // 反复「掉下去再来」卡死）。退化时改用凸包，碰撞宽松些但绝不穿模
+    if (body.parts.length === 1 && !Matter.Vertices.isConvex(verts)) {
+      console.warn(`[block] ${p.adcode} 凸分解失败，改用凸包刚体`);
+      body = Matter.Bodies.fromVertices(x, y, [Matter.Vertices.hull(verts)], opts);
+    }
     // 低关卡加大转动惯量帮小朋友稳住，高关卡逐渐回落增加晃动
     Matter.Body.setInertia(body, body.inertia * prof.inertiaScale);
     scene.matter.world.add(body);

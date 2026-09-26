@@ -14,8 +14,12 @@ const OUT = path.join(ROOT, 'src/data/animals.json');
 
 const RASTER = 640; // 光栅化分辨率（写实剪影细节多，高一些保真）
 const SIMPLIFY_RAW = 1.4; // 追踪结果先简化（640 空间像素，容差小保细节）
-const PHYS_TOLERANCE_PX = 10;
-const HULL_BLEND = 0.25;
+// 物理轮廓贴合视觉（2026-09-26 用户反馈企鹅等「碰撞边缘和视觉边缘差很多」）：
+// 原 10px 粗简化 + 凸包收拢 25% 会给写实剪影造出 10%-28% 面积的隐形空气墙，已取消收拢、容差收到 3px
+const PHYS_TOLERANCE_PX = 3;
+const HULL_BLEND = 0;
+/** 底部压平带（占物理轮廓高度比例）：只把脚底/肚底垫平防跷跷板，不再大面积填腿间空隙 */
+const FLAT_ZONE = 0.04;
 
 // face: 表情锚点在包围盒内的比例坐标 [fx, fy]（0-1，缺省用弦扫描启发式，
 // 对照表确认眼睛落在头部后逐个覆盖）；px: 目标最大边长（对标省份 130-300 分布）
@@ -141,6 +145,51 @@ function closestOnHull(p, hull) {
     }
   }
   return best;
+}
+
+/** 线段 ab 与 cd 严格相交（不含共端点） */
+function segCross(a, b, c, d) {
+  const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+  return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+}
+
+function firstCrossing(pts) {
+  const n = pts.length;
+  for (let i = 0; i < n; i++)
+    for (let j = i + 2; j < n; j++) {
+      if (i === 0 && j === n - 1) continue;
+      if (segCross(pts[i], pts[(i + 1) % n], pts[j], pts[(j + 1) % n])) return [i, j];
+    }
+  return null;
+}
+
+/** 去掉自交：每次删掉交叉边上的一个端点（优先删掉后面积变化最小的），直到是简单多边形 */
+function untangle(pts, name) {
+  let cur = pts.slice();
+  for (let guard = 0; guard < 20; guard++) {
+    const hit = firstCrossing(cur);
+    if (!hit) return cur;
+    const n = cur.length;
+    const cands = [hit[0], (hit[0] + 1) % n, hit[1], (hit[1] + 1) % n];
+    let best = null;
+    for (const k of cands) {
+      const next = cur.filter((_, i) => i !== k);
+      const score = (firstCrossing(next) ? 1e9 : 0) + Math.abs(Math.abs(area(next)) - Math.abs(area(cur)));
+      if (!best || score < best.score) best = { next, score };
+    }
+    cur = best.next;
+  }
+  throw new Error(`${name}: 物理轮廓自交无法修复`);
+}
+
+function area(pts) {
+  let s = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    s += a.x * b.y - b.x * a.y;
+  }
+  return s / 2;
 }
 
 function bounds(pts) {
@@ -389,9 +438,11 @@ for (const a of LIST) {
   // 底部压平：最低点向上 12% 高度内的点全部压到最低水平——写实动物的细腿/圆肚
   // 落地会跷跷板摇晃甚至滚落，给一个隐形平底座（物理轮廓不可见，视觉不变）
   const pb = bounds(phys);
-  const flatZone = (pb.maxY - pb.minY) * 0.12;
+  const flatZone = (pb.maxY - pb.minY) * FLAT_ZONE;
   phys = phys.map((p) => (p.y > pb.maxY - flatZone ? { x: p.x, y: pb.maxY } : p));
   phys = simplify(phys, 1.5);
+  // 压平会把相邻点挤到同一水平线上，可能造出自交（奶牛曾因此凸分解失败、刚体退化成小三角形卡死）
+  phys = untangle(phys, a.name);
 
   // 表情锚点：人工比例坐标优先（不在轮廓内时吸附到同高度最近的实心段），弦扫描兜底
   let fx;

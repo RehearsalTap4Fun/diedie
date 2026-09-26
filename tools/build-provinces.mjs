@@ -90,8 +90,10 @@ const PICKS = {
 };
 
 const SIMPLIFY_TOLERANCE_PX = 4;
-const PHYS_TOLERANCE_PX = 10; // 物理轮廓重度简化，磨掉锯齿
-const HULL_BLEND = 0.25; // 物理轮廓向凸包收拢的比例，削平深凹陷
+// 物理轮廓贴合视觉（2026-09-26，与动物管线同步收紧）：原 10px 粗简化 + 凸包收拢 25% 造成
+// 10%-28% 面积的视觉/碰撞偏差（内蒙古 16.8% 的可见区域没有碰撞），改为与视觉同精度、不收拢
+const PHYS_TOLERANCE_PX = SIMPLIFY_TOLERANCE_PX;
+const HULL_BLEND = 0;
 const BASE_PX = 200; // 中位尺寸省份的目标最大边长
 const MIN_PX = 160; // 小省放大下限（澳门/香港/台湾等，太小落不稳也够不到高度）
 const MAX_PX = 300;
@@ -170,6 +172,51 @@ function project(ring) {
   const cLat = ring.reduce((s, p) => s + p[1], 0) / ring.length;
   const k = Math.cos((cLat * Math.PI) / 180) * 111;
   return ring.map(([lon, lat]) => ({ x: lon * k, y: -lat * 111 }));
+}
+
+/** 线段 ab 与 cd 严格相交（不含共端点） */
+function segCross(a, b, c, d) {
+  const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+  return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+}
+
+function firstCrossing(pts) {
+  const n = pts.length;
+  for (let i = 0; i < n; i++)
+    for (let j = i + 2; j < n; j++) {
+      if (i === 0 && j === n - 1) continue;
+      if (segCross(pts[i], pts[(i + 1) % n], pts[j], pts[(j + 1) % n])) return [i, j];
+    }
+  return null;
+}
+
+/** 去掉自交：每次删掉交叉边上的一个端点（优先删掉后面积变化最小的），直到是简单多边形 */
+function untangle(pts, name) {
+  let cur = pts.slice();
+  for (let guard = 0; guard < 20; guard++) {
+    const hit = firstCrossing(cur);
+    if (!hit) return cur;
+    const n = cur.length;
+    const cands = [hit[0], (hit[0] + 1) % n, hit[1], (hit[1] + 1) % n];
+    let best = null;
+    for (const k of cands) {
+      const next = cur.filter((_, i) => i !== k);
+      const score = (firstCrossing(next) ? 1e9 : 0) + Math.abs(Math.abs(area(next)) - Math.abs(area(cur)));
+      if (!best || score < best.score) best = { next, score };
+    }
+    cur = best.next;
+  }
+  throw new Error(`${name}: 物理轮廓自交无法修复`);
+}
+
+function area(pts) {
+  let s = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    s += a.x * b.y - b.x * a.y;
+  }
+  return s / 2;
 }
 
 function bounds(pts) {
@@ -272,6 +319,7 @@ const out = prepared.map(({ f, pts, maxDim }) => {
     return { x: p.x + (q.x - p.x) * HULL_BLEND, y: p.y + (q.y - p.y) * HULL_BLEND };
   });
   phys = simplify(phys, 1.5);
+  phys = untangle(phys, name);
 
   console.log(
     `${name}: 视觉 ${ring.length} 顶点 / 物理 ${phys.length} 顶点, ${Math.round(

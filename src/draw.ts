@@ -16,6 +16,13 @@ export function drawProvince(
   const dark = p.patch ? 0x3a3a3a : base.clone().darken(22).color;
   const pts = p.verts.map(([x, y]) => new Phaser.Geom.Point(x * scale, y * scale));
 
+  if (p.parts) {
+    // 汉字：逐个笔画块填充（洞已用零宽缝接进外圈），再分别描外圈与洞
+    drawParts(g, p, scale, fill, dark, Math.max(2, 5 * scale));
+    if (withFace) drawFace(g, p, scale, 'normal');
+    return;
+  }
+
   g.fillStyle(fill, 1);
   g.fillPoints(pts, true);
   if (p.pattern) {
@@ -28,6 +35,42 @@ export function drawProvince(
 
   if (!withFace) return;
   drawFace(g, p, scale, 'normal');
+}
+
+const toPts = (ring: [number, number][], scale: number) =>
+  ring.map(([x, y]) => new Phaser.Geom.Point(x * scale, y * scale));
+
+function drawParts(
+  g: Phaser.GameObjects.Graphics,
+  p: Province,
+  scale: number,
+  fill: number,
+  stroke: number,
+  lw: number
+) {
+  g.fillStyle(fill, 1);
+  for (const part of p.parts!) g.fillPoints(toPts(part.fill, scale), true);
+  g.lineStyle(lw, stroke, 1);
+  for (const part of p.parts!) for (const r of part.rings) g.strokePoints(toPts(r, scale), true, true);
+}
+
+/** 置灰剪影（图鉴未收集格）：与 drawProvince 同形状、单色、无表情 */
+export function drawSilhouette(
+  g: Phaser.GameObjects.Graphics,
+  p: Province,
+  scale: number,
+  fill = 0xc3ccd3,
+  stroke = 0xa4b0b9
+) {
+  if (p.parts) {
+    drawParts(g, p, scale, fill, stroke, 2);
+    return;
+  }
+  const pts = toPts(p.verts, scale);
+  g.fillStyle(fill, 1);
+  g.fillPoints(pts, true);
+  g.lineStyle(2, stroke, 1);
+  g.strokePoints(pts, true, true);
 }
 
 export type FaceMood = 'normal' | 'blink' | 'wow' | 'squint';

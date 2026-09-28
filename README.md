@@ -7,8 +7,14 @@
 CC0 为主、6 张 CC-BY（作者署名见 `tools/phylopic-svg/ATTRIBUTION.md`），
 剪影原样使用、只加表情不改外形；`npm run animals` 从 SVG 光栅化提取外轮廓，
 与省份同一套物理/表情/语音管线）；
-动物模式下「我的地图」变为「动物图鉴」（网格集卡，未收集灰剪影），无线索题和拼图；
-两种模式的关卡进度与收集互相独立。
+动物模式下「我的地图」变为「动物图鉴」（网格集卡，未收集灰剪影），无拼图。
+
+**叠汉字**（第三个模式）：24 个象形字（日月山水火木石雨田 / 人口目耳手足大子 / 牛羊马鸟鱼竹门），
+每题看手绘插画认字（`src/assets/art/c-*-0.svg`），答对后播「演变」三格：图画 → 甲骨文 → 今天的字
+（古文字来自 Wikimedia Commons 公有领域，`tools/ancient-src/` + `node tools/prep-ancient.mjs`），再叠字过关；
+「我的汉字卡」集卡。字形用马善政毛笔楷书子集（`tools/fonts/`，SIL OFL；笔锋让轮廓不规则、叠起来有难度），`npm run chars`
+光栅化提取每个笔画块与洞（`src/data/chars.json` 的 `parts` 画法 / `physParts` 多块刚体），
+审阅图 `SHOT_DIR=/tmp node tools/shot-chars.mjs`。三种模式的关卡进度与收集互相独立。
 
 **玩法**：单人闯关（小小班二选一 / 大大班四选一）、我的地图（省份）/ 动物图鉴（动物）、
 省份拼图（仅省份模式）、双人竞技（同屏热座：🐼 熊猫队 vs 🐯 老虎队轮流放块，
@@ -20,7 +26,8 @@ CC0 为主、6 张 CC-BY（作者署名见 `tools/phylopic-svg/ATTRIBUTION.md`�
 ```bash
 npm install
 npm run data     # 从 DataV·GeoAtlas 拉取并生成省份轮廓数据（src/data/provinces.json）
-npm run animals  # 从手工控制点生成动物轮廓数据（src/data/animals.json）
+npm run animals  # 从 PhyloPic/FreeSVG 剪影生成动物轮廓数据（src/data/animals.json）
+npm run chars    # 从字体生成汉字块数据（src/data/chars.json）
 npm run voice    # 云童声/say 批量合成语音（src/assets/voice/*.m4a，增量缓存）
 npm run dev     # 本地开发（--host，可用手机在同一局域网访问）
 npm run build   # 类型检查 + 单文件构建（dist/index.html 内联全部资源）

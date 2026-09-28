@@ -9,8 +9,8 @@ const OLD_KEY = 'diedie-save-v1';
 export const PROFILE_AVATARS = ['🐼', '🐯', '🦚'];
 export const PROFILE_NAMES = ['熊猫宝宝', '老虎宝宝', '孔雀宝宝'];
 
-/** 全局玩法模式：叠省份 / 叠动物 */
-export type GameMode = 'province' | 'animal';
+/** 全局玩法模式：叠省份 / 叠动物 / 叠汉字 */
+export type GameMode = 'province' | 'animal' | 'char';
 
 /** 声音分频道开关（全局，家长设置面板用），默认全开 */
 export interface SoundSettings {
@@ -25,12 +25,14 @@ export interface SoundSettings {
 }
 
 interface ProfileData {
-  /** 每种难度各自到达的关卡；键 = 选项数，动物模式加前缀 a（'2'/'4'/'a2'/'a4'） */
+  /** 每种难度各自到达的关卡；键 = 选项数，动物模式加前缀 a、汉字模式加前缀 c（'4'/'a4'/'c4'） */
   level: Record<string, number>;
   /** 已收集的省份 adcode */
   owned: string[];
   /** 已收集的动物 adcode（a-*），旧存档没有该字段，读取处 ?? [] 兜底 */
   ownedA?: string[];
+  /** 已收集的汉字 adcode（c-*） */
+  ownedC?: string[];
   /** 题目选项数（家长按档案设置，给小龄孩子开二选一），缺省四选一。关卡进度两种难度共用 */
   choices?: 2 | 4;
 }
@@ -46,7 +48,7 @@ interface SaveData {
 }
 
 function emptyProfile(): ProfileData {
-  return { level: {}, owned: [], ownedA: [] };
+  return { level: {}, owned: [], ownedA: [], ownedC: [] };
 }
 
 function fresh(): SaveData {
@@ -124,7 +126,7 @@ export function setActiveProfile(i: number) {
 export function profileSummary(i: number): { ownedCount: number; hasAny: boolean } {
   const d = load();
   const p = d.profiles[i] ?? emptyProfile();
-  const count = (p.owned ?? []).length + (p.ownedA ?? []).length;
+  const count = (p.owned ?? []).length + (p.ownedA ?? []).length + (p.ownedC ?? []).length;
   const hasAny = count > 0 || Object.values(p.level).some((n) => n > 1);
   return { ownedCount: count, hasAny };
 }
@@ -157,7 +159,7 @@ export function setSoundOption(key: keyof SoundSettings, on: boolean) {
 // ---------- 当前档案读写（游戏场景使用，默认按当前模式） ----------
 
 function levelKey(choices: number, mode: GameMode): string {
-  return (mode === 'animal' ? 'a' : '') + choices;
+  return (mode === 'animal' ? 'a' : mode === 'char' ? 'c' : '') + choices;
 }
 
 export function savedLevel(choices: number, mode: GameMode = getMode()): number {
@@ -174,13 +176,13 @@ export function saveLevel(choices: number, level: number, mode: GameMode = getMo
 
 export function getOwned(mode: GameMode = getMode()): string[] {
   const p = cur(load());
-  return (mode === 'animal' ? p.ownedA : p.owned) ?? [];
+  return (mode === 'animal' ? p.ownedA : mode === 'char' ? p.ownedC : p.owned) ?? [];
 }
 
 export function addOwned(adcodes: string[], mode: GameMode = getMode()) {
   const d = load();
   const p = cur(d);
-  const key = mode === 'animal' ? 'ownedA' : 'owned';
+  const key = mode === 'animal' ? 'ownedA' : mode === 'char' ? 'ownedC' : 'owned';
   const set = new Set(p[key] ?? []);
   adcodes.forEach((a) => set.add(a));
   p[key] = [...set];
@@ -193,7 +195,8 @@ export function hasProgress(): boolean {
   return (
     Object.values(p.level).some((n) => n > 1) ||
     (p.owned ?? []).length > 0 ||
-    (p.ownedA ?? []).length > 0
+    (p.ownedA ?? []).length > 0 ||
+    (p.ownedC ?? []).length > 0
   );
 }
 

@@ -11,6 +11,7 @@
     "preview": "vite preview --host",
     "data": "node tools/build-provinces.mjs",
     "animals": "node tools/build-animals.mjs",
+    "chars": "node tools/build-chars.mjs",
     "voice": "node tools/build-voice.mjs",
     "sfx": "node tools/build-sfx.mjs",
     "icons": "node tools/build-icons.mjs"

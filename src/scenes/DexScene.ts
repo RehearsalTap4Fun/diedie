@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { ANIMALS, Province } from '../types';
-import { drawProvince, FONT } from '../draw';
+import { ANIMALS, CHARS, Province } from '../types';
+import { drawProvince, drawSilhouette, FONT } from '../draw';
 import { speakId } from '../speak';
-import { getOwned } from '../save';
+import { getOwned, getMode } from '../save';
 import { makeFactCard } from '../ui';
 import { drawSceneBg, fancyTitle, makeCandyButton, cardRect } from '../uikit';
 
@@ -13,7 +13,7 @@ const GRID_X = (W - COLS * CELL) / 2;
 const GRID_Y = 222;
 
 /**
- * 动物图鉴（叠动物模式的「我的地图」）：34 格网格，
+ * 动物图鉴 / 汉字卡（叠动物、叠汉字模式的「我的地图」）：网格，
  * 已收集的亮彩色带表情，未收集的置灰剪影；点击听介绍/提示继续闯关。
  */
 export default class DexScene extends Phaser.Scene {
@@ -25,17 +25,19 @@ export default class DexScene extends Phaser.Scene {
 
   create() {
     this.card = undefined;
-    const owned = new Set(getOwned('animal'));
-    drawSceneBg(this, 0xc4ecd6, 0xfdf9ec, {
+    const charMode = getMode() === 'char';
+    const shapes = charMode ? CHARS : ANIMALS;
+    const owned = new Set(getOwned(charMode ? 'char' : 'animal'));
+    drawSceneBg(this, charMode ? 0xffe6b8 : 0xc4ecd6, 0xfdf9ec, {
       clouds: [
         [140, 165, 0.7],
         [610, 130, 0.55],
       ],
     });
 
-    fancyTitle(this, W / 2, 110, '我的动物图鉴', 60, '#379a63');
+    fancyTitle(this, W / 2, 110, charMode ? '我的汉字卡' : '我的动物图鉴', 60, charMode ? '#d9822b' : '#379a63');
     this.add
-      .text(W / 2, 180, `已收集 ${owned.size} / ${ANIMALS.length} · 点一点认识的动物`, {
+      .text(W / 2, 180, `已收集 ${owned.size} / ${shapes.length} · 点一点认识的${charMode ? '字' : '动物'}`, {
         fontFamily: FONT,
         fontSize: '28px',
         color: '#5b4a3f',
@@ -44,9 +46,9 @@ export default class DexScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    ANIMALS.forEach((p, i) => {
+    shapes.forEach((p, i) => {
       const row = Math.floor(i / COLS);
-      const rowCount = Math.min(COLS, ANIMALS.length - row * COLS);
+      const rowCount = Math.min(COLS, shapes.length - row * COLS);
       const rowOffset = ((COLS - rowCount) * CELL) / 2; // 末行不满时居中
       const cx = GRID_X + rowOffset + (i % COLS) * CELL + CELL / 2;
       const cy = GRID_Y + row * CELL + CELL / 2;
@@ -59,14 +61,17 @@ export default class DexScene extends Phaser.Scene {
     );
 
     this.add
-      .text(W / 2, 1315, '动物剪影来自 PhyloPic 与 FreeSVG（CC0/CC-BY，作者见项目 ATTRIBUTION）', {
-        fontFamily: FONT,
-        fontSize: '20px',
-        color: '#718096',
-      })
+      .text(
+        W / 2,
+        1315,
+        charMode
+          ? '字形来自源流黑体圆角（Resource Han Rounded，SIL OFL）'
+          : '动物剪影来自 PhyloPic 与 FreeSVG（CC0/CC-BY，作者见项目 ATTRIBUTION）',
+        { fontFamily: FONT, fontSize: '20px', color: '#718096' }
+      )
       .setOrigin(0.5);
 
-    speakId('sys-dex');
+    speakId(charMode ? 'sys-cards' : 'sys-dex');
   }
 
   private makeCell(p: Province, cx: number, cy: number, has: boolean) {
@@ -79,11 +84,7 @@ export default class DexScene extends Phaser.Scene {
       drawProvince(g, p, s, true);
     } else {
       // 置灰剪影（不描表情，保留猜猜看的神秘感）
-      const pts = p.verts.map(([x, y]) => new Phaser.Geom.Point(x * s, y * s));
-      g.fillStyle(0xc3ccd3, 1);
-      g.fillPoints(pts, true);
-      g.lineStyle(2, 0xa4b0b9, 1);
-      g.strokePoints(pts, true, true);
+      drawSilhouette(g, p, s);
     }
     const xs = p.verts.map((v) => v[0]);
     const ys = p.verts.map((v) => v[1]);

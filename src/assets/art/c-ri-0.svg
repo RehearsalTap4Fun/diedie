@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#FFF3D6"/>
+  <line x1="148.0" y1="100.0" x2="164.0" y2="100.0" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="133.94112549695427" y1="133.94112549695427" x2="145.25483399593904" y2="145.25483399593904" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="100.0" y1="148.0" x2="100.0" y2="164.0" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="66.05887450304573" y1="133.94112549695427" x2="54.74516600406096" y2="145.25483399593904" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="52.0" y1="100.0" x2="36.0" y2="100.00000000000001" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="66.05887450304571" y1="66.05887450304573" x2="54.74516600406095" y2="54.74516600406096" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="99.99999999999999" y1="52.0" x2="99.99999999999999" y2="36.0" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>  <line x1="133.94112549695427" y1="66.05887450304571" x2="145.25483399593904" y2="54.74516600406095" stroke="#FFA726" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="100" cy="100" r="38" fill="#FFB74D"/>
+  <circle cx="100" cy="100" r="28" fill="#FFC870"/>
+</svg>

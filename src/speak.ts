@@ -13,7 +13,7 @@ import { getSoundSettings } from './save';
 function channelOf(id: string): 'quiz' | 'tap' | 'hint' {
   if (/^(q-name-|clue-|fact-)/.test(id) || id === 'sys-correct' || id === 'sys-wrong')
     return 'quiz';
-  if (/^intro-/.test(id) || /^sys-(locked|map|dex|prof-\d|mode-\w+|puzzle-locked|reset|btn-\w+|leave|undo)$/.test(id))
+  if (/^intro-/.test(id) || /^sys-(locked|map|dex|cards|prof-\d|mode-\w+|puzzle-locked|reset|btn-\w+|leave|undo)$/.test(id))
     return 'tap';
   return 'hint';
 }

@@ -19,6 +19,7 @@ import {
   makeCandyButton,
   makeIconButton,
   showLeaveWindow,
+  drawIcon,
 } from '../uikit';
 
 const W = 750;
@@ -61,6 +62,8 @@ export default class GameScene extends Phaser.Scene {
   private hint!: Phaser.GameObjects.Text;
   /** 当前题目的语音 ID（重播按钮用） */
   private quizVoice = '';
+  /** 题目插画（叠汉字：答对后飞向正确字块，演示「图画变成字」） */
+  private quizPic?: Phaser.GameObjects.Image | Phaser.GameObjects.Text;
   /** 退出撤回窗口打开中：物理暂停、不结算、不接收拖动 */
   private leaving = false;
 
@@ -100,6 +103,7 @@ export default class GameScene extends Phaser.Scene {
     this.settleMs = 0;
     this.rotateBtns = [];
     this.quizVoice = '';
+    this.quizPic = undefined;
     this.leaving = false;
   }
 
@@ -319,7 +323,8 @@ export default class GameScene extends Phaser.Scene {
     ).slice(0, this.choices - 1);
     const options = Phaser.Utils.Array.Shuffle([this.target, ...others]);
 
-    // 大大班 45% 概率出线索题（动物/美食/地标），小小班只出认轮廓题
+    // 四选一 45% 概率出线索题（动物/美食/地标），二选一只出认轮廓题；
+    // 叠汉字每题都是看图认字（图画就是象形字的来历）
     const clues = CLUES[this.target.adcode] ?? [];
     let qtext = `找一找：${this.target.display} 在哪里？`;
     let emoji: string | undefined;
@@ -328,6 +333,7 @@ export default class GameScene extends Phaser.Scene {
     const forceIdx =
       forceMatch && forceAd === this.target.adcode ? Number(forceMatch[2]) : -1;
     if (
+      (getMode() === 'char' && clues.length > 0) ||
       (this.choices === 4 && clues.length > 0 && Math.random() < 0.45) ||
       (forceIdx >= 0 && clues[forceIdx])
     ) {
@@ -350,14 +356,17 @@ export default class GameScene extends Phaser.Scene {
       .setInteractive(); // 挡住底层输入
     const panel = this.add.graphics();
     panelRect(panel, 35, 120, W - 70, 980, 44);
+    // 中文没有空格，Phaser 的按词换行不会断行：长题目按字数缩小字号保持单行（下限 34px），
+    // 实在更长再按字换行兜底
+    const qSize = Math.max(34, Math.min(48, Math.floor(620 / [...qtext].length)));
     const q = this.add
       .text(W / 2, 220, qtext, {
         fontFamily: FONT,
-        fontSize: '48px',
+        fontSize: `${qSize}px`,
         fontStyle: 'bold',
         color: '#7a5b2e',
         align: 'center',
-        wordWrap: { width: 600 },
+        wordWrap: { width: 620, useAdvancedWrap: true },
       })
       .setOrigin(0.5);
     q.setShadow(0, 2, 'rgba(122,91,46,0.18)', 2, false, true);
@@ -372,6 +381,7 @@ export default class GameScene extends Phaser.Scene {
         : emoji
           ? this.add.text(W / 2, 350, emoji, { fontSize: '96px' }).setOrigin(0.5)
           : undefined;
+    this.quizPic = pic;
     if (pic) {
       pic.setInteractive({ useHandCursor: true }).on('pointerdown', replay);
       c.add(pic);
@@ -437,9 +447,11 @@ export default class GameScene extends Phaser.Scene {
       this.answered = true;
       this.pool.shift();
       speakId(`fact-ok-${p.adcode}`);
-      this.tweens.add({ targets: box, scale: 1.12, duration: 140, yoyo: true });
-      // 留足时间读完特征卡片再进入放置
-      this.time.delayedCall(2400, () => {
+      const evolve = getMode() === 'char' && !!this.quizPic;
+      if (evolve) this.playEvolution(p, this.quizPic!);
+      else this.tweens.add({ targets: box, scale: 1.12, duration: 140, yoyo: true });
+      // 留足时间读完特征卡片（叠汉字再多留看完演变）再进入放置
+      this.time.delayedCall(evolve ? 3600 : 2400, () => {
         this.factUI?.destroy();
         this.factUI = undefined;
         this.optionFaces.forEach((f) => f.destroy());
@@ -465,8 +477,111 @@ export default class GameScene extends Phaser.Scene {
           repeat: -1,
           ease: 'Sine.easeInOut',
         });
+        // 叠汉字：再亮出甲骨文当桥——它比今天的字更像图画，帮孩子把图和字对上
+        if (getMode() === 'char') this.showAncientHint();
       }
     }
+  }
+
+  /** 图画左侧弹出甲骨文小卡（「古时候这样写」），答错一次后出现 */
+  private showAncientHint() {
+    const key = `ancient-${this.target.adcode}`;
+    if (!this.quizUI || !this.textures.exists(key)) return;
+    const c = this.add.container(W / 2 - 170, 332);
+    const g = this.add.graphics();
+    g.fillStyle(0x2b3a4a, 0.12);
+    g.fillRoundedRect(-58, -52, 116, 116, 20);
+    g.fillStyle(0xf3e2c0, 1);
+    g.fillRoundedRect(-58, -58, 116, 116, 20);
+    const t = this.add
+      .text(0, 70, '古时候这样写', { fontFamily: FONT, fontSize: '20px', color: '#a0793d' })
+      .setOrigin(0.5);
+    c.add([g, this.add.image(0, 0, key).setDisplaySize(96, 96), t]);
+    c.setScale(0);
+    this.quizUI.add(c);
+    this.tweens.add({ targets: c, scale: 1, duration: 320, ease: 'Back.easeOut' });
+  }
+
+  /**
+   * 叠汉字「演变」：图画 → 甲骨文 → 今天的字，三格依次出现、箭头相连，
+   * 让孩子看见形状是怎么一步步变成字的（插画从题目处飞到第一格）
+   */
+  private playEvolution(p: Province, pic: Phaser.GameObjects.Image | Phaser.GameObjects.Text) {
+    const c = this.quizUI;
+    if (!c) return;
+    const y = 715;
+    const slot = 160;
+    const xs = [W / 2 - 220, W / 2, W / 2 + 220];
+    const card = this.add.graphics();
+    cardRect(card, W / 2, y, 680, 330, 36, 1, 0xf6c453);
+    card.setAlpha(0);
+    c.add(card);
+    this.tweens.add({ targets: card, alpha: 1, duration: 200 });
+    const label = (x: number, str: string, delay: number) => {
+      const t = this.add
+        .text(x, y + 118, str, { fontFamily: FONT, fontSize: '24px', color: '#a0793d' })
+        .setOrigin(0.5)
+        .setAlpha(0);
+      c.add(t);
+      this.tweens.add({ targets: t, alpha: 1, delay, duration: 250 });
+    };
+    const arrow = (x: number, delay: number) => {
+      const g = this.add.graphics();
+      drawIcon(g, 'next', x, y, 34, 0xe0b25a);
+      g.setAlpha(0);
+      c.add(g);
+      this.tweens.add({ targets: g, alpha: 1, delay, duration: 200 });
+    };
+    const pop = (o: Phaser.GameObjects.Container, delay: number, onPop?: () => void) => {
+      o.setScale(0);
+      c.add(o);
+      this.tweens.add({ targets: o, scale: 1, delay, duration: 380, ease: 'Back.easeOut', onStart: onPop });
+    };
+
+    // ① 图画：从题目位置飞到第一格
+    pic.disableInteractive();
+    c.bringToTop(pic);
+    this.tweens.add({
+      targets: pic,
+      x: xs[0],
+      y,
+      scale: pic.scale * (slot / 150),
+      duration: 450,
+      ease: 'Cubic.easeInOut',
+    });
+    label(xs[0], '图画', 300);
+
+    // ② 甲骨文：画在骨片色底上
+    const key = `ancient-${p.adcode}`;
+    if (this.textures.exists(key)) {
+      arrow((xs[0] + xs[1]) / 2, 480);
+      const bone = this.add.container(xs[1], y);
+      const g = this.add.graphics();
+      g.fillStyle(0x2b3a4a, 0.12);
+      g.fillRoundedRect(-slot / 2, -slot / 2 + 6, slot, slot, 26);
+      g.fillStyle(0xf3e2c0, 1);
+      g.fillRoundedRect(-slot / 2, -slot / 2, slot, slot, 26);
+      bone.add([g, this.add.image(0, 0, key).setDisplaySize(slot - 26, slot - 26)]);
+      pop(bone, 560);
+      label(xs[1], '甲骨文', 700);
+    }
+
+    // ③ 今天的字：带表情的字块
+    arrow((xs[1] + xs[2]) / 2, 1100);
+    const s = (slot - 10) / Math.max(p.size[0], p.size[1]);
+    const bodyG = this.add.graphics();
+    drawProvince(bodyG, p, s, false);
+    const face = new Face(this, p, s);
+    this.optionFaces.push(face);
+    const vx = p.verts.map((v) => v[0]);
+    const vy = p.verts.map((v) => v[1]);
+    const inner = this.add.container(
+      (-(Math.min(...vx) + Math.max(...vx)) / 2) * s,
+      (-(Math.min(...vy) + Math.max(...vy)) / 2) * s,
+      [bodyG, face.g]
+    );
+    pop(this.add.container(xs[2], y, [inner]), 1180, () => sfx('boing'));
+    label(xs[2], '今天的字', 1320);
   }
 
   /** 点选反馈卡片：省份小轮廓 + 名字 + 一句话特征 */
@@ -622,7 +737,7 @@ export default class GameScene extends Phaser.Scene {
         W / 2,
         630,
         n
-          ? `新收集 ${n} 个${getMode() === 'animal' ? '动物' : '省份'}！`
+          ? `新收集 ${n} 个${{ province: '省份', animal: '动物', char: '字' }[getMode()]}！`
           : `叠了 ${this.blocks.length} 块${nextHigher ? ' · 下一关线更高哦' : ''}`,
         {
           fontFamily: FONT,

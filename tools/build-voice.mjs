@@ -20,6 +20,7 @@ const CONCURRENCY = 3;
 
 const provinces = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/provinces.json'), 'utf8'));
 const animals = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/animals.json'), 'utf8'));
+const chars = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/chars.json'), 'utf8'));
 const clues = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/clues.json'), 'utf8'));
 const facts = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/data/facts.json'), 'utf8'));
 
@@ -49,6 +50,8 @@ const lines = {
   'sys-mode-province': '来叠我们的省份啦！',
   'sys-mode-animal': '来叠动物朋友啦！',
   'sys-dex': '看看我的动物图鉴！',
+  'sys-mode-char': '来叠汉字啦！',
+  'sys-cards': '看看我的汉字卡！',
   // 图标按钮念名（孩子不识字，靠听认按钮）
   'sys-btn-next': '下一关，出发！',
   'sys-btn-home': '回菜单啦',
@@ -80,6 +83,18 @@ for (const a of animals) {
     lines[`fact-ok-${a.adcode}`] = `答对啦！这是${a.display}，${desc}！`;
     lines[`fact-no-${a.adcode}`] = `这是${a.display}，${desc}。再找找哦！`;
     lines[`intro-${a.adcode}`] = `这是${a.display}，${desc}`;
+  }
+}
+
+// 叠汉字：display 为「山字」；线索题（看图认字）已在 clues.json 循环里生成
+for (const c of chars) {
+  lines[`q-name-${c.adcode}`] = `找一找，${c.display}在哪里？`;
+  lines[`aim-${c.adcode}`] = `把${c.display}叠上去吧`;
+  const desc = facts[c.adcode];
+  if (desc) {
+    lines[`fact-ok-${c.adcode}`] = `答对啦！这是${c.display}，${desc}！`;
+    lines[`fact-no-${c.adcode}`] = `这是${c.display}，${desc}。再找找哦！`;
+    lines[`intro-${c.adcode}`] = `这是${c.display}，${desc}`;
   }
 }
 

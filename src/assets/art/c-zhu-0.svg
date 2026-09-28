@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="102" r="80" fill="#E9F4E4"/>
+
+  <rect x="74" y="48" width="17" height="116" rx="8" fill="#7DBB6B"/>
+  <line x1="74" y1="78" x2="91" y2="78" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <line x1="74" y1="108" x2="91" y2="108" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <line x1="74" y1="138" x2="91" y2="138" stroke="#5F9E52" stroke-width="4" stroke-linecap="round"/>
+  <rect x="118" y="58" width="17" height="106" rx="8" fill="#96CC80"/>
+  <line x1="118" y1="88" x2="135" y2="88" stroke="#6FA85F" stroke-width="4" stroke-linecap="round"/>
+  <line x1="118" y1="118" x2="135" y2="118" stroke="#6FA85F" stroke-width="4" stroke-linecap="round"/>
+  <line x1="118" y1="148" x2="135" y2="148" stroke="#6FA85F" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="60" cy="46" rx="18" ry="6.5" fill="#8CC37A" transform="rotate(-35 60 46)"/>
+  <ellipse cx="96" cy="38" rx="18" ry="6.5" fill="#6FA85F" transform="rotate(20 96 38)"/>
+  <ellipse cx="104" cy="58" rx="18" ry="6.5" fill="#8CC37A" transform="rotate(-18 104 58)"/>
+  <ellipse cx="142" cy="52" rx="18" ry="6.5" fill="#8CC37A" transform="rotate(-22 142 52)"/>
+  <ellipse cx="150" cy="74" rx="18" ry="6.5" fill="#96CC80" transform="rotate(24 150 74)"/>
+</svg>

@@ -20,6 +20,24 @@ export interface PhysProfile {
   landDampAngular: number;
 }
 
+/**
+ * 多个互不相连的轮廓（汉字的断笔/点）合成一个刚体。
+ * 不能直接把多组顶点交给 Bodies.fromVertices：其中凸的那几组会被挪到原点、丢掉相对位置
+ * （「雨」的四个点全叠在一处，质心跑出字外，整块陷进平台）。
+ * 这里逐组在各自质心处单独建体，再把全部部件合成一个复合体，最后把质心移到 (x, y)。
+ */
+function multiPartBody(Matter: any, sets: { x: number; y: number }[][], opts: object, x: number, y: number) {
+  const parts: any[] = [];
+  for (const set of sets) {
+    const c = Matter.Vertices.centre(set);
+    const sub = Matter.Bodies.fromVertices(c.x, c.y, [set], opts, true, 0.01, 10);
+    parts.push(...(sub.parts.length > 1 ? sub.parts.slice(1) : [sub]));
+  }
+  const body = Matter.Body.create({ ...opts, parts });
+  Matter.Body.setPosition(body, { x, y });
+  return body;
+}
+
 /** 已落下的省份块：物理用平滑轮廓（phys），渲染用精细轮廓（verts）+ 动态表情 */
 export class Block {
   readonly province: Province;
@@ -42,7 +60,9 @@ export class Block {
   ) {
     this.province = p;
     const Matter = (Phaser.Physics.Matter as any).Matter;
-    const verts = p.phys.map(([vx, vy]) => ({ x: vx, y: vy }));
+    // 汉字等多块形状：每个笔画块一组顶点，Matter 分别凸分解后合成一个刚体
+    const sets = (p.physParts ?? [p.phys]).map((ring) => ring.map(([vx, vy]) => ({ x: vx, y: vy })));
+    const verts = sets[0];
     const opts = {
       friction: prof.friction,
       frictionStatic: prof.frictionStatic,
@@ -50,10 +70,10 @@ export class Block {
       frictionAir: 0.02,
       sleepThreshold: prof.sleepThreshold,
     };
-    let body = Matter.Bodies.fromVertices(x, y, [verts], opts, true, 0.01, 10);
+    let body = sets.length > 1 ? multiPartBody(Matter, sets, opts, x, y) : Matter.Bodies.fromVertices(x, y, sets, opts, true, 0.01, 10);
     // 保险：轮廓自交时凸分解失败，Matter 会退化成一个远小于轮廓的碎片刚体（曾导致奶牛穿过平台、
     // 反复「掉下去再来」卡死）。退化时改用凸包，碰撞宽松些但绝不穿模
-    if (body.parts.length === 1 && !Matter.Vertices.isConvex(verts)) {
+    if (sets.length === 1 && body.parts.length === 1 && !Matter.Vertices.isConvex(verts)) {
       console.warn(`[block] ${p.adcode} 凸分解失败，改用凸包刚体`);
       body = Matter.Bodies.fromVertices(x, y, [Matter.Vertices.hull(verts)], opts);
     }
@@ -66,8 +86,9 @@ export class Block {
     // 中心标定图形偏移（verts 与 phys 同一坐标系，对齐物理即对齐视觉）
     const bcx = (body.bounds.min.x + body.bounds.max.x) / 2;
     const bcy = (body.bounds.min.y + body.bounds.max.y) / 2;
-    const xs = p.phys.map((v) => v[0]);
-    const ys = p.phys.map((v) => v[1]);
+    const all = (p.physParts ?? [p.phys]).flat();
+    const xs = all.map((v) => v[0]);
+    const ys = all.map((v) => v[1]);
     const rbcx = (Math.min(...xs) + Math.max(...xs)) / 2;
     const rbcy = (Math.min(...ys) + Math.max(...ys)) / 2;
     this.offX = bcx - x - rbcx;
@@ -78,11 +99,12 @@ export class Block {
     drawProvince(bodyG, p, 1, false);
     if (DEBUG_PHYS) {
       bodyG.lineStyle(3, 0xff0000, 0.55);
-      bodyG.strokePoints(
-        p.phys.map(([px, py]) => new Phaser.Geom.Point(px, py)),
-        true,
-        true
-      );
+      for (const ring of p.physParts ?? [p.phys])
+        bodyG.strokePoints(
+          ring.map(([px, py]) => new Phaser.Geom.Point(px, py)),
+          true,
+          true
+        );
     }
     this.face = new Face(scene, p, 1);
     this.face.setMood('wow'); // 下落中的惊讶脸

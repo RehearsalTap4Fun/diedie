@@ -15,6 +15,7 @@ import {
   segCross,
   firstCrossing,
   untangle,
+  cleanRing,
   area,
   bounds,
   centroid,
@@ -177,7 +178,7 @@ for (const a of LIST) {
   const pb = bounds(phys);
   const flatZone = (pb.maxY - pb.minY) * FLAT_ZONE;
   phys = phys.map((p) => (p.y > pb.maxY - flatZone ? { x: p.x, y: pb.maxY } : p));
-  phys = simplify(phys, 1.5);
+  phys = cleanRing(simplify(phys, 1.5));
   // 压平会把相邻点挤到同一水平线上，可能造出自交（奶牛曾因此凸分解失败、刚体退化成小三角形卡死）
   phys = untangle(phys, a.name);
 

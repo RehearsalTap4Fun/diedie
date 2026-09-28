@@ -35,7 +35,12 @@ function multiPartBody(Matter: any, sets: { x: number; y: number }[][], opts: ob
   const parts: any[] = [];
   for (const set of sets) {
     const c = Matter.Vertices.centre(set);
-    const sub = Matter.Bodies.fromVertices(c.x, c.y, [set], opts, true, 0.01, 10);
+    let sub = Matter.Bodies.fromVertices(c.x, c.y, [set], opts, true, 0.01, 10);
+    // 保险：凸分解失败或碎片全被面积下限滤掉时 Matter 返回空（曾导致「竹」落下即消失），退回凸包
+    if (!sub) {
+      console.warn('[block] 某组轮廓无法建体，改用凸包');
+      sub = Matter.Bodies.fromVertices(c.x, c.y, [Matter.Vertices.hull(set)], opts);
+    }
     parts.push(...(sub.parts.length > 1 ? sub.parts.slice(1) : [sub]));
   }
   const body = Matter.Body.create({ ...opts, parts });
@@ -78,7 +83,7 @@ export class Block {
     let body = sets.length > 1 ? multiPartBody(Matter, sets, opts, x, y) : Matter.Bodies.fromVertices(x, y, sets, opts, true, 0.01, 10);
     // 保险：轮廓自交时凸分解失败，Matter 会退化成一个远小于轮廓的碎片刚体（曾导致奶牛穿过平台、
     // 反复「掉下去再来」卡死）。退化时改用凸包，碰撞宽松些但绝不穿模
-    if (sets.length === 1 && body.parts.length === 1 && !Matter.Vertices.isConvex(verts)) {
+    if (!body || (sets.length === 1 && body.parts.length === 1 && !Matter.Vertices.isConvex(verts))) {
       console.warn(`[block] ${p.adcode} 凸分解失败，改用凸包刚体`);
       body = Matter.Bodies.fromVertices(x, y, [Matter.Vertices.hull(verts)], opts);
     }

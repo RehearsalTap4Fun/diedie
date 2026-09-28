@@ -28,6 +28,7 @@ npm install
 npm run data     # 从 DataV·GeoAtlas 拉取并生成省份轮廓数据（src/data/provinces.json）
 npm run animals  # 从 PhyloPic/FreeSVG 剪影生成动物轮廓数据（src/data/animals.json）
 npm run chars    # 从字体生成汉字块数据（src/data/chars.json）
+npm run check:phys  # 物理轮廓体检（需先 npm run dev；改完轮廓数据必跑，URL=… 可指定地址）
 npm run voice    # 云童声/say 批量合成语音（src/assets/voice/*.m4a，增量缓存）
 npm run dev     # 本地开发（--host，可用手机在同一局域网访问）
 npm run build   # 类型检查 + 单文件构建（dist/index.html 内联全部资源）

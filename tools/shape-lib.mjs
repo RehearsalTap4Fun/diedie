@@ -98,7 +98,22 @@ export function firstCrossing(pts) {
       if (i === 0 && j === n - 1) continue;
       if (segCross(pts[i], pts[(i + 1) % n], pts[j], pts[(j + 1) % n])) return [i, j];
     }
+  // 「碰触」：某个顶点落在不相邻的边上（不严格相交，但多边形已不简单，poly-decomp 会切坏——
+  // 「门」的钩被找平裁短后折回点正好落在底边上，凸分解只剩 28% 面积）
+  for (let k = 0; k < n; k++)
+    for (let j = 0; j < n; j++) {
+      if (j === k || (j + 1) % n === k) continue;
+      if (distToSeg(pts[k], pts[j], pts[(j + 1) % n]) < 0.5) return [(k - 1 + n) % n, j];
+    }
   return null;
+}
+
+function distToSeg(p, a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const L = dx * dx + dy * dy || 1;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
 
 /** 去掉自交：每次删掉交叉边上的一个端点（优先删掉后面积变化最小的），直到是简单多边形 */
@@ -340,4 +355,37 @@ export function openMask(mask, w, h, r) {
   for (let i = 0; i < r; i++) m = step(m, true);
   for (let i = 0; i < r; i++) m = step(m, false);
   return m;
+}
+
+/**
+ * 清理多边形：去掉几乎重合的相邻点、共线点和「折返」尖刺（前后两条边反向共线）。
+ * 底部压平会把几个点压到同一水平线上，可能造出零面积的折返边——poly-decomp 遇到会
+ * 「quickDecomp: max level reached」然后 Matter 返回空刚体（曾导致「竹」一落下就消失）。
+ */
+export function cleanRing(pts, eps = 1) {
+  let r = pts.slice();
+  let changed = true;
+  while (changed && r.length > 3) {
+    changed = false;
+    for (let i = 0; i < r.length && r.length > 3; i++) {
+      const a = r[(i - 1 + r.length) % r.length];
+      const b = r[i];
+      const c = r[(i + 1) % r.length];
+      const abx = b.x - a.x;
+      const aby = b.y - a.y;
+      const bcx = c.x - b.x;
+      const bcy = c.y - b.y;
+      const cross = abx * bcy - aby * bcx;
+      const tooClose = Math.hypot(abx, aby) < eps;
+      // 与 a→c 的距离很小即视为共线（含折返：a→b→c 反向）
+      const lenAC = Math.hypot(c.x - a.x, c.y - a.y) || 1;
+      const collinear = Math.abs(cross) / lenAC < eps * 0.5;
+      if (tooClose || collinear) {
+        r.splice(i, 1);
+        changed = true;
+        i--;
+      }
+    }
+  }
+  return r;
 }

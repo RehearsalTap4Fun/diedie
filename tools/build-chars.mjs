@@ -13,6 +13,7 @@ import {
   bounds,
   convexHull,
   untangle,
+  cleanRing,
   labelComponents,
   traceLabel,
 } from './shape-lib.mjs';
@@ -264,7 +265,7 @@ for (const a of LIST) {
   const flatY = pMaxY - (pMaxY - pMinY) * FLAT_ZONE;
   const physParts = physRaw.map((ring, i) =>
     untangle(
-      simplify(ring.map((p) => (p.y > flatY ? { x: p.x, y: pMaxY } : p)), 1.5),
+      cleanRing(simplify(ring.map((p) => (p.y > flatY ? { x: p.x, y: pMaxY } : p)), 1.5)),
       `${a.ch}#${i}`
     )
   );

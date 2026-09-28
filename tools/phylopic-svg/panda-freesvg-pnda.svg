@@ -1,0 +1,378 @@
+<?xml version="1.0"?>
+<svg
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    xmlns:ns1="http://sozi.baierouge.fr"
+    id="svg2"
+    viewBox="0 0 240.85 297.7"
+    version="1.1"
+  >
+  <defs
+      id="defs4"
+    >
+    <radialGradient
+        id="imagebot_8"
+        gradientUnits="userSpaceOnUse"
+        cy="372.74"
+        cx="221.01"
+        gradientTransform="matrix(1 0 0 .72807 0 101.36)"
+        r="51.63"
+      >
+      <stop
+          id="imagebot_38"
+          stop-color="#faa"
+          offset="0"
+      />
+      <stop
+          id="imagebot_37"
+          stop-color="#faa"
+          stop-opacity="0"
+          offset="1"
+      />
+    </radialGradient
+    >
+  </defs
+  >
+  <g
+      id="imagebot_1"
+      transform="translate(-151.56 -13.118)"
+    >
+    <title
+        id="title12"
+      >Layer 1</title
+    >
+    <ellipse
+        id="imagebot_58"
+        stroke-linejoin="round"
+        d="m 387.90665,172.5 c 0,30.6518 -51.90154,55.5 -115.92533,55.5 -64.02379,0 -115.92532,-24.8482 -115.92532,-55.5 0,-30.6518 51.90153,-55.5 115.92532,-55.5 64.02379,0 115.92533,24.8482 115.92533,55.5 z"
+        stroke-opacity="null"
+        cy="172.5"
+        rx="115.93"
+        ry="55.5"
+        stroke="#000"
+        cx="271.98"
+        stroke-linecap="round"
+        stroke-width="9"
+    />
+    <circle
+        id="imagebot_46"
+        stroke-linejoin="round"
+        r="96"
+        d="m 368,205 c 0,53.01934 -42.98066,96 -96,96 -53.01934,0 -96,-42.98066 -96,-96 0,-53.01934 42.98066,-96 96,-96 53.01934,0 96,42.98066 96,96 z"
+        stroke-opacity="null"
+        fill-opacity="null"
+        cx="272"
+        cy="205"
+        stroke="#000"
+        stroke-linecap="round"
+        stroke-width="2"
+        fill="#fff"
+    />
+    <rect
+        id="imagebot_477"
+        stroke-linejoin="round"
+        stroke-opacity="null"
+        fill-opacity="null"
+        height="22.349"
+        width="165.45"
+        stroke="#000"
+        stroke-linecap="round"
+        y="135.74"
+        x="189.5"
+        stroke-width="9"
+    />
+    <g
+        id="imagebot_39"
+        transform="translate(173,12)"
+      >
+      <g
+          id="imagebot_3"
+          transform="scale(.26667)"
+        >
+        <path
+            id="imagebot_20"
+            transform="matrix(1.1965 0 0 1.3868 -10.259 -195.22)"
+            d="m580 206.65a74.286 62.857 0 1 1 -148.57 0 74.286 62.857 0 1 1 148.57 0z"
+        />
+        <path
+            id="imagebot_19"
+            transform="matrix(1.1965 0 0 1.3868 -454.67 -183.26)"
+            d="m580 206.65a74.286 62.857 0 1 1 -148.57 0 74.286 62.857 0 1 1 148.57 0z"
+        />
+        <g
+            id="imagebot_4"
+          >
+          <path
+              id="imagebot_18"
+              fill="none"
+              transform="matrix(1.1965 0 0 1.1965 -68.374 -217.42)"
+              d="m600 400.93a232.86 191.43 0 1 1 -465.71 0 232.86 191.43 0 1 1 465.71 0z"
+          />
+          <path
+              id="imagebot_17"
+              d="m657.14 413.79a270 204.29 0 1 1 -540 0 270 204.29 0 1 1 540 0z"
+              transform="matrix(1.1014 0 0 1.0846 -43.507 -190.5)"
+              stroke="#000"
+              stroke-width="8.8"
+              fill="#f9f9f9"
+          />
+          <path
+              id="imagebot_16"
+              stroke-width="8.8"
+              stroke="#000"
+              transform="matrix(.84096 -.85110 .85110 .84096 -300.93 144.78)"
+              d="m340 358.08a60 31.429 0 1 1 -120 0 60 31.429 0 1 1 120 0z"
+          />
+          <path
+              id="imagebot_15"
+              transform="matrix(1.1965 0 0 1.1965 683.71 -144.35)"
+              d="m-228.57 352.36a30 20 0 1 1 -60 0 30 20 0 1 1 60 0z"
+          />
+          <path
+              id="imagebot_14"
+              stroke-width="8.8"
+              stroke="#000"
+              transform="matrix(.81875 .87249 -.87249 .81875 589.11 -326.46)"
+              d="m340 358.08a60 31.429 0 1 1 -120 0 60 31.429 0 1 1 120 0z"
+          />
+          <path
+              id="imagebot_13"
+              fill="#ececec"
+              transform="matrix(1.4358 0 0 1.4624 -16.412 -805.66)"
+              d="m211.43 682.36a14.286 12.857 0 1 1 -28.571 0 14.286 12.857 0 1 1 28.571 0z"
+          />
+          <path
+              id="imagebot_12"
+              fill="#ececec"
+              transform="matrix(1.4358 0 0 1.4624 192.12 -803.95)"
+              d="m211.43 682.36a14.286 12.857 0 1 1 -28.571 0 14.286 12.857 0 1 1 28.571 0z"
+          />
+          <path
+              id="imagebot_11"
+              transform="matrix(1.3674 0 0 1.7947 13.609 -1230.7)"
+              d="m194.29 792.36a10 8.5714 0 1 1 -20 0 10 8.5714 0 1 1 20 0z"
+          />
+          <path
+              id="imagebot_10"
+              transform="matrix(1.3674 0 0 1.7947 222.14 -1227.3)"
+              d="m194.29 792.36a10 8.5714 0 1 1 -20 0 10 8.5714 0 1 1 20 0z"
+          />
+          <path
+              id="imagebot_9"
+              stroke="#000"
+              stroke-width="13.732"
+              fill="none"
+              d="m300.37 322.79 83.398 64.218 72.204-69.766"
+          />
+          <path
+              id="imagebot_7"
+              fill="url(#imagebot_8)"
+              transform="matrix(2.3509 0 0 2.6988 -286.79 -655.39)"
+              d="m272.64 372.74a51.63 37.591 0 1 1 -103.26 0 51.63 37.591 0 1 1 103.26 0z"
+          />
+          <path
+              id="imagebot_5"
+              fill="url(#imagebot_8)"
+              transform="matrix(2.3518 0 0 2.6988 -25.177 -654.49)"
+              d="m272.64 372.74a51.63 37.591 0 1 1 -103.26 0 51.63 37.591 0 1 1 103.26 0z"
+          />
+        </g
+        >
+      </g
+      >
+    </g
+    >
+    <ellipse
+        id="imagebot_47"
+        stroke-linejoin="round"
+        d="m 373.71185,257.15567 c 0,25.83543 -15.98116,46.77919 -35.69491,46.77919 -19.71376,0 -35.69491,-20.94376 -35.69491,-46.77919 0,-25.83543 15.98115,-46.77919 35.69491,-46.77919 19.71375,0 35.69491,20.94376 35.69491,46.77919 z"
+        stroke-opacity="null"
+        cy="257.16"
+        rx="35.695"
+        ry="46.779"
+        stroke="#000"
+        cx="338.02"
+        stroke-linecap="round"
+        stroke-width="2"
+    />
+    <ellipse
+        id="imagebot_48"
+        stroke-linejoin="round"
+        d="m 244.3138,263.81238 c 0,25.40605 -15.86977,46.00173 -35.44612,46.00173 -19.57636,0 -35.44613,-20.59568 -35.44613,-46.00173 0,-25.40606 15.86977,-46.00173 35.44613,-46.00173 19.57635,0 35.44612,20.59567 35.44612,46.00173 z"
+        stroke-opacity="null"
+        cy="263.81"
+        rx="35.446"
+        ry="46.002"
+        stroke="#000"
+        cx="208.87"
+        stroke-linecap="round"
+        stroke-width="2"
+    />
+    <path
+        id="imagebot_480"
+        stroke-linejoin="round"
+        d="m330.24 134.66c-0.51199-0.51201-0.2999-0.81194-1.024-1.536-0.36203-0.36203-0.51199-0.512-1.024-0.512-0.512 0-0.039-0.82806-0.512-1.024-0.66894-0.27708-0.51199 1.024-0.51199 1.536 0 0 0 0.512-0.51199 0.512h-1.024c-0.51199 0-1.536-0.51199-1.536 0 0 0.512 1.024 0 1.024 0h2.56"
+        stroke-opacity="null"
+        fill-opacity="null"
+        stroke="#000"
+        stroke-linecap="round"
+        stroke-width="9"
+        fill="none"
+    />
+    <path
+        id="imagebot_481"
+        stroke-linejoin="round"
+        d="m319.49 136.19v-1.536s0-0.51201 0.51199-0.51201h0.51199v0"
+        stroke-opacity="null"
+        fill-opacity="null"
+        stroke="#000"
+        stroke-linecap="round"
+        stroke-width="9"
+        fill="none"
+    />
+    <path
+        id="imagebot_483"
+        stroke-linejoin="round"
+        d="m218.11 133.63c0-0.512 0.36204-1.174 0-1.536l-0.51199-0.51199v-1.536c0-0.512 0-1.024 0.51199-1.024s0.51199 0.512 1.024 0.512 0 0.512 0.51199 0.512c0.51201 0 0.66198 0.14997 1.024 0.512 0.36204 0.36204 0.66197 0.14998 1.024 0.51201s0.66196 0.14994 1.024 0.51199c0.36203 0.36203 0.14995 0.66196 0.51199 1.024 0.72408 0.72408 1.536 0 1.536 0 0.51199 0 0.66197 0.14997 1.024 0.512s1.024 0.512 0.51199 0.512h-2.048c0 0.512-0.14995 0.66196-0.512 1.024-0.72407 0.72407-1.536 0-2.048 0h-6.144c-0.51201 0-0.51201-0.51201-1.024-0.51201h-3.584"
+        stroke-opacity="null"
+        fill-opacity="null"
+        stroke="#000"
+        stroke-linecap="round"
+        stroke-width="9"
+        fill="none"
+    />
+    <path
+        id="imagebot_484"
+        stroke-linejoin="round"
+        d="m227.84 137.73c0-0.512 0.74691-0.86705 1.024-1.536 0.19594-0.47304 0.51201-0.51201 1.024-0.51201v-1.024"
+        stroke-opacity="null"
+        fill-opacity="null"
+        stroke="#000"
+        stroke-linecap="round"
+        stroke-width="9"
+        fill="none"
+    />
+    <circle
+        id="imagebot_485"
+        stroke-linejoin="round"
+        r="4.5"
+        d="m 387.5,176 c 0,2.48528 -2.01472,4.5 -4.5,4.5 -2.48528,0 -4.5,-2.01472 -4.5,-4.5 0,-2.48528 2.01472,-4.5 4.5,-4.5 2.48528,0 4.5,2.01472 4.5,4.5 z"
+        stroke-opacity="null"
+        fill-opacity="null"
+        cx="383"
+        cy="176"
+        stroke-linecap="round"
+        stroke-width="9"
+    />
+    <circle
+        id="imagebot_486"
+        stroke-linejoin="round"
+        r="4.5"
+        d="m 382.5,176 c 0,2.48528 -2.01472,4.5 -4.5,4.5 -2.48528,0 -4.5,-2.01472 -4.5,-4.5 0,-2.48528 2.01472,-4.5 4.5,-4.5 2.48528,0 4.5,2.01472 4.5,4.5 z"
+        stroke-opacity="null"
+        fill-opacity="null"
+        cx="378"
+        cy="176"
+        stroke-linecap="round"
+        stroke-width="9"
+    />
+  </g
+  >
+  <metadata
+    >
+    <rdf:RDF
+      >
+      <cc:Work
+        >
+        <dc:format
+          >image/svg+xml</dc:format
+        >
+        <dc:type
+            rdf:resource="http://purl.org/dc/dcmitype/StillImage"
+        />
+        <cc:license
+            rdf:resource="http://creativecommons.org/licenses/publicdomain/"
+        />
+        <dc:publisher
+          >
+          <cc:Agent
+              rdf:about="http://openclipart.org/"
+            >
+            <dc:title
+              >Openclipart</dc:title
+            >
+          </cc:Agent
+          >
+        </dc:publisher
+        >
+        <dc:title
+          >Panda</dc:title
+        >
+        <dc:date
+          >2013-09-10T00:42:39</dc:date
+        >
+        <dc:description
+          >A little Panda sitting down and looking at you.</dc:description
+        >
+        <dc:source
+          >https://openclipart.org/detail/183272/panda-by-juliamatic-183272</dc:source
+        >
+        <dc:creator
+          >
+          <cc:Agent
+            >
+            <dc:title
+              >JuliaMatic</dc:title
+            >
+          </cc:Agent
+          >
+        </dc:creator
+        >
+        <dc:subject
+          >
+          <rdf:Bag
+            >
+            <rdf:li
+              >Panda</rdf:li
+            >
+            <rdf:li
+              >animal</rdf:li
+            >
+            <rdf:li
+              >cute</rdf:li
+            >
+            <rdf:li
+              >red cheeks</rdf:li
+            >
+          </rdf:Bag
+          >
+        </dc:subject
+        >
+      </cc:Work
+      >
+      <cc:License
+          rdf:about="http://creativecommons.org/licenses/publicdomain/"
+        >
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#Reproduction"
+        />
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#Distribution"
+        />
+        <cc:permits
+            rdf:resource="http://creativecommons.org/ns#DerivativeWorks"
+        />
+      </cc:License
+      >
+    </rdf:RDF
+    >
+  </metadata
+  >
+</svg
+>

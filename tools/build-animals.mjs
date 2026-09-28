@@ -27,7 +27,8 @@ const LIST = [
   { id: 'cat', name: '小猫', color: '#FF8A65', px: 200, file: 'cat-81e1f778.svg', face: [0.84, 0.38], er: 12 },
   { id: 'dog', name: '小狗', color: '#BCAAA4', px: 210, file: 'dog-d3e8133c.svg', face: [0.68, 0.14], er: 12 },
   { id: 'rabbit', name: '兔子', color: '#F48FB1', px: 200, file: 'rabbit-d71fcd12.svg', face: [0.3, 0.4], er: 12 },
-  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-3d259941.svg', face: [0.23, 0.6], er: 9, patch: true, pattern: {} },
+  // 大熊猫：PhyloPic 仅 4 张且都难认，改用 FreeSVG 正面坐姿卡通（CC0），黑白花纹由 pattern 提取
+  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-freesvg-pnda.svg', face: [0.5, 0.25], er: 12, patch: true, pattern: {} },
   { id: 'tiger', name: '老虎', color: '#FFA726', px: 250, file: 'tiger-a02b9a9a.svg', face: [0.13, 0.3], er: 12 },
   { id: 'lion', name: '狮子', color: '#FFCA28', px: 250, file: 'lion-78dbe564.svg', face: [0.14, 0.22], er: 11 },
   { id: 'elephant', name: '大象', color: '#9FA8DA', px: 265, file: 'elephant-910d853a.svg', face: [0.25, 0.3], er: 14 },

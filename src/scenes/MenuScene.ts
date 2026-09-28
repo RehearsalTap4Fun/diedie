@@ -189,7 +189,7 @@ export default class MenuScene extends Phaser.Scene {
         W / 2,
         1318,
         animalMode
-          ? '原型版 · 动物剪影来自 PhyloPic（CC0/CC-BY）'
+          ? '原型版 · 动物剪影来自 PhyloPic 与 FreeSVG（CC0/CC-BY）'
           : '原型版 · 轮廓改绘自标准地图（DataV·GeoAtlas）',
         {
           fontFamily: FONT,

@@ -59,7 +59,7 @@ export default class DexScene extends Phaser.Scene {
     );
 
     this.add
-      .text(W / 2, 1315, '动物剪影来自 PhyloPic（CC0/CC-BY，作者见项目 ATTRIBUTION）', {
+      .text(W / 2, 1315, '动物剪影来自 PhyloPic 与 FreeSVG（CC0/CC-BY，作者见项目 ATTRIBUTION）', {
         fontFamily: FONT,
         fontSize: '20px',
         color: '#718096',

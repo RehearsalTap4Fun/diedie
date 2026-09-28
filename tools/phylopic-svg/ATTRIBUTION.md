@@ -1,6 +1,6 @@
 # 素材出处
 
-本目录动物剪影全部来自 PhyloPic（https://www.phylopic.org），
+本目录动物剪影来自 PhyloPic（https://www.phylopic.org），大熊猫一张来自 FreeSVG（https://freesvg.org，CC0），
 由 tools/build-animals.mjs 光栅化提取外轮廓、仅叠加表情，不改动外形
 （大熊猫另从原图提取黑白花纹画成深色层，同样不改外形）。
 
@@ -32,7 +32,7 @@ CC0 无署名义务；CC-BY 4.0 条目须保留下列作者署名。
 | monkey | 4e9c5666-79cc-4766-a7d3-d547514b0d77 | CC0 |  |
 | mouse | 36dc0476-ae7d-49ed-85c4-220139930bfc | CC0 |  |
 | owl | d7d457c1-4c08-4e7e-9af4-f537020c2775 | CC0 |  |
-| panda | 3d259941-f8c2-48cb-843b-af4a178031e9 | CC0 | Margot Michaud |
+| panda | （非 PhyloPic）FreeSVG「pnda」https://freesvg.org/pnda ，文件 panda-freesvg-pnda.svg | CC0 | FreeSVG 未标注作者 |
 | penguin | f2e02022-2700-484d-a66d-b2a900030371 | CC0 |  |
 | pig | 2e857d0f-a2de-493d-aa51-e182dc3ee2ba | CC0 |  |
 | rabbit | d71fcd12-90f6-40c4-b918-0dac0ba3e809 | CC0 |  |

@@ -17,6 +17,8 @@ export interface Province {
   eyeR: number;
   /** 眼周黑眼圈（大熊猫）：表情级特征，不改变外形 */
   patch?: boolean;
+  /** 身上的黑白花纹（大熊猫：耳朵/眼圈/四肢/肩带），与 verts 同一坐标系的若干多边形；只上色不改外形 */
+  pattern?: [number, number][][];
   /** 包围盒 [宽, 高] */
   size: [number, number];
 }

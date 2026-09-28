@@ -1,7 +1,8 @@
 # 素材出处
 
 本目录动物剪影全部来自 PhyloPic（https://www.phylopic.org），
-由 tools/build-animals.mjs 光栅化提取外轮廓、仅叠加表情，不改动外形。
+由 tools/build-animals.mjs 光栅化提取外轮廓、仅叠加表情，不改动外形
+（大熊猫另从原图提取黑白花纹画成深色层，同样不改外形）。
 
 CC0 无署名义务；CC-BY 4.0 条目须保留下列作者署名。
 
@@ -13,7 +14,7 @@ CC0 无署名义务；CC-BY 4.0 条目须保留下列作者署名。
 | cat | 81e1f778-d176-47ba-a0c4-01f54e1157a9 | CC0 |  |
 | chick | 2de1c95c-7e1f-429b-9c08-17f0a27d176f | CC0 |  |
 | cow | dc5c561e-e030-444d-ba22-3d427b60e58a | CC-BY 4.0 | DFoidl (modified by T. Michael Keesey) |
-| crab | 7197c71a-0653-4e82-bcbb-b156c150826a | CC0 |  |
+| crab | 422060a1-0c7f-4428-b645-bdd26d815482 | 公有领域（PDM 1.0） | Jebulon（vectorized by T. Michael Keesey） |
 | croc | 2fa0c118-f96c-407e-91eb-522065829f14 | CC0 |  |
 | dino | 2003b4f6-7b8d-4c98-9797-1aca028dc2ac | CC0 |  |
 | dog | d3e8133c-e669-4881-9111-b44145f94212 | CC0 |  |
@@ -31,7 +32,7 @@ CC0 无署名义务；CC-BY 4.0 条目须保留下列作者署名。
 | monkey | 4e9c5666-79cc-4766-a7d3-d547514b0d77 | CC0 |  |
 | mouse | 36dc0476-ae7d-49ed-85c4-220139930bfc | CC0 |  |
 | owl | d7d457c1-4c08-4e7e-9af4-f537020c2775 | CC0 |  |
-| panda | 4b1f7a58-8713-4d6e-a130-4c8a1ac2f749 | CC0 |  |
+| panda | 3d259941-f8c2-48cb-843b-af4a178031e9 | CC0 | Margot Michaud |
 | penguin | f2e02022-2700-484d-a66d-b2a900030371 | CC0 |  |
 | pig | 2e857d0f-a2de-493d-aa51-e182dc3ee2ba | CC0 |  |
 | rabbit | d71fcd12-90f6-40c4-b918-0dac0ba3e809 | CC0 |  |

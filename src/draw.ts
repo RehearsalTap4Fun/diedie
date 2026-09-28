@@ -18,6 +18,11 @@ export function drawProvince(
 
   g.fillStyle(fill, 1);
   g.fillPoints(pts, true);
+  if (p.pattern) {
+    g.fillStyle(0x2f2f2f, 1);
+    for (const ring of p.pattern)
+      g.fillPoints(ring.map(([x, y]) => new Phaser.Geom.Point(x * scale, y * scale)), true);
+  }
   g.lineStyle(Math.max(2, 5 * scale), dark, 1);
   g.strokePoints(pts, true, true);
 

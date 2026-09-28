@@ -27,7 +27,7 @@ const LIST = [
   { id: 'cat', name: '小猫', color: '#FF8A65', px: 200, file: 'cat-81e1f778.svg', face: [0.84, 0.38], er: 12 },
   { id: 'dog', name: '小狗', color: '#BCAAA4', px: 210, file: 'dog-d3e8133c.svg', face: [0.68, 0.14], er: 12 },
   { id: 'rabbit', name: '兔子', color: '#F48FB1', px: 200, file: 'rabbit-d71fcd12.svg', face: [0.3, 0.4], er: 12 },
-  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-4b1f7a58.svg', face: [0.6, 0.16], er: 13, patch: true },
+  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-3d259941.svg', face: [0.23, 0.6], er: 9, patch: true, pattern: {} },
   { id: 'tiger', name: '老虎', color: '#FFA726', px: 250, file: 'tiger-a02b9a9a.svg', face: [0.13, 0.3], er: 12 },
   { id: 'lion', name: '狮子', color: '#FFCA28', px: 250, file: 'lion-78dbe564.svg', face: [0.14, 0.22], er: 11 },
   { id: 'elephant', name: '大象', color: '#9FA8DA', px: 265, file: 'elephant-910d853a.svg', face: [0.25, 0.3], er: 14 },
@@ -54,7 +54,7 @@ const LIST = [
   { id: 'hedgehog', name: '刺猬', color: '#A9927B', px: 190, file: 'hedgehog-baa41c61.svg', face: [0.13, 0.6], er: 8 },
   { id: 'squirrel', name: '小松鼠', color: '#E59866', px: 205, file: 'squirrel-23c700c9.svg', face: [0.72, 0.3], er: 10 },
   { id: 'snail', name: '蜗牛', color: '#AED581', px: 185, file: 'snail-d8f236a7.svg', face: [0.88, 0.66], er: 8 },
-  { id: 'crab', name: '螃蟹', color: '#EF5350', px: 225, file: 'crab-7197c71a.svg', face: [0.5, 0.5], er: 13 },
+  { id: 'crab', name: '螃蟹', color: '#EF5350', px: 225, file: 'crab-422060a1.svg', face: [0.5, 0.55], er: 13 },
   { id: 'dino', name: '小恐龙', color: '#66BB6A', px: 280, file: 'dino-2003b4f6.svg', face: [0.14, 0.05], er: 6 },
   { id: 'croc', name: '鳄鱼', color: '#26A69A', px: 260, file: 'croc-2fa0c118.svg', face: [0.5, 0.12], er: 7 },
   { id: 'mouse', name: '小老鼠', color: '#F9A825', px: 160, file: 'mouse-36dc0476.svg', face: [0.77, 0.33], er: 9 },
@@ -292,11 +292,10 @@ function faceAnchorAuto(pts) {
 // ---------- 蒙版轮廓追踪 ----------
 
 /** 最大连通域（4 邻接）的 Moore 边界追踪，返回像素坐标闭环 */
-function traceLargestContour(mask, w, h) {
-  // 连通域标记，取最大
+/** 4 邻域连通域标记：返回 label（0 = 背景）与各连通域像素数 sizes[id] */
+function labelComponents(mask, w, h) {
   const label = new Int32Array(w * h);
-  let bestLabel = 0;
-  let bestSize = 0;
+  const sizes = [0];
   let cur = 0;
   const stack = [];
   for (let i = 0; i < w * h; i++) {
@@ -321,11 +320,20 @@ function traceLargestContour(mask, w, h) {
         }
       }
     }
-    if (size > bestSize) {
-      bestSize = size;
-      bestLabel = cur;
-    }
+    sizes.push(size);
   }
+  return { label, sizes };
+}
+
+function traceLargestContour(mask, w, h) {
+  const { label, sizes } = labelComponents(mask, w, h);
+  let bestLabel = 0;
+  for (let k = 1; k < sizes.length; k++) if (sizes[k] > (sizes[bestLabel] ?? 0)) bestLabel = k;
+  return traceLabel(label, w, h, bestLabel);
+}
+
+/** Moore 邻域追踪指定连通域的外轮廓 */
+function traceLabel(label, w, h, bestLabel) {
   const solid = (x, y) => x >= 0 && y >= 0 && x < w && y < h && label[y * w + x] === bestLabel;
 
   // 起点：最上一行的最左实心像素
@@ -372,6 +380,32 @@ function traceLargestContour(mask, w, h) {
   return contour;
 }
 
+/** 二值开运算：先腐蚀 r 次再膨胀 r 次（3x3），去掉宽度 < 2r 的细线（原图描边），保留大块花纹 */
+function openMask(mask, w, h, r) {
+  const step = (src, keep) => {
+    const dst = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        let all = true;
+        let any = false;
+        for (let dy = -1; dy <= 1; dy++)
+          for (let dx = -1; dx <= 1; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+            const v = nx >= 0 && ny >= 0 && nx < w && ny < h ? src[ny * w + nx] : 0;
+            all &&= !!v;
+            any ||= !!v;
+          }
+        dst[y * w + x] = (keep ? all : any) ? 1 : 0;
+      }
+    return dst;
+  };
+  let m = mask;
+  for (let i = 0; i < r; i++) m = step(m, true);
+  for (let i = 0; i < r; i++) m = step(m, false);
+  return m;
+}
+
 // ---------- 主流程 ----------
 
 
@@ -403,8 +437,13 @@ for (const a of LIST) {
       const k = size / Math.max(img.naturalWidth, img.naturalHeight);
       ctx.drawImage(img, 0, 0, img.naturalWidth * k, img.naturalHeight * k);
       const d = ctx.getImageData(0, 0, size, size).data;
+      // 0 = 透明，1 = 浅色实心，2 = 深色实心（黑白花纹素材用来提取花纹）
       const arr = new Uint8Array(size * size);
-      for (let i = 0; i < size * size; i++) arr[i] = d[i * 4 + 3] > 25 ? 1 : 0;
+      for (let i = 0; i < size * size; i++) {
+        if (d[i * 4 + 3] <= 25) continue;
+        const lum = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+        arr[i] = lum < 100 ? 2 : 1;
+      }
       let s = '';
       for (let i = 0; i < arr.length; i += 4096)
         s += String.fromCharCode(...arr.subarray(i, i + 4096));
@@ -412,7 +451,8 @@ for (const a of LIST) {
     },
     { svg: svgText, size: RASTER }
   );
-  const mask = Uint8Array.from(Buffer.from(maskStr, 'base64'));
+  const raw = Uint8Array.from(Buffer.from(maskStr, 'base64'));
+  const mask = raw.map((v) => (v ? 1 : 0));
 
   let ring = traceLargestContour(mask, RASTER, RASTER);
   ring = simplify(ring, SIMPLIFY_RAW);
@@ -428,6 +468,26 @@ for (const a of LIST) {
   const c = centroid(verts);
   verts = verts.map((p) => ({ x: p.x - c.x, y: p.y - c.y }));
   const b = bounds(verts);
+
+  // 黑白花纹（大熊猫）：素材里的深色大块（耳朵/眼圈/四肢/肩带）在同一坐标系画成深色层，
+  // 外形不变只上色，与表情同属「加工」；原图细描边由开运算去掉
+  let pattern;
+  if (a.pattern) {
+    const dark = openMask(raw.map((v) => (v === 2 ? 1 : 0)), RASTER, RASTER, a.pattern.open ?? 3);
+    const { label, sizes } = labelComponents(dark, RASTER, RASTER);
+    const minArea = RASTER * RASTER * (a.pattern.minArea ?? 0.0015);
+    pattern = [];
+    for (let k = 1; k < sizes.length; k++) {
+      if (sizes[k] < minArea) continue;
+      let pr = traceLabel(label, RASTER, RASTER, k);
+      pr = chaikin(simplify(pr, SIMPLIFY_RAW));
+      pr = simplify(
+        pr.map((p) => ({ x: p.x * s - c.x, y: p.y * s - c.y })),
+        1.0
+      );
+      if (pr.length >= 3) pattern.push(pr);
+    }
+  }
 
   let phys = simplify(scaled, PHYS_TOLERANCE_PX).map((p) => ({ x: p.x - c.x, y: p.y - c.y }));
   const hull = convexHull(phys);
@@ -468,6 +528,15 @@ for (const a of LIST) {
   // er 指定时为最终像素的眼睛半径（头小的动物手工给小值）；缺省按弦宽自适应
   const chord = chordAt(verts, fy, fx) ?? { w: (b.maxX - b.minX) * 0.4 };
   const eyeR = a.er ?? Math.min(18, Math.max(6.5, chord.w * 0.1));
+  // 素材自带的眼圈与表情系统的眼距对不上：去掉表情附近的花纹块，眼圈交给 drawFace 的 patch 画
+  if (pattern) {
+    const before = pattern.length;
+    pattern = pattern.filter((ring) => {
+      const cc = centroid(ring);
+      return Math.hypot(cc.x - fx, cc.y - fy) > eyeR * 3.2;
+    });
+    console.log(`  ${a.name}: 花纹 ${pattern.length} 块（去掉表情处 ${before - pattern.length} 块）`);
+  }
 
   console.log(
     `${a.name}: 视觉 ${verts.length} 顶点 / 物理 ${phys.length} 顶点, ${Math.round(
@@ -476,6 +545,7 @@ for (const a of LIST) {
   );
   out.push({
     ...(a.patch ? { patch: true } : {}),
+    ...(pattern ? { pattern: pattern.map((r) => r.map((p) => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10])) } : {}),
     adcode: `a-${a.id}`,
     name: a.name,
     display: a.name,

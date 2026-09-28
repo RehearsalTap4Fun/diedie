@@ -1,20 +1,18 @@
-// 生成 PWA 图标（public/icons/）：天蓝底 + 🧸，与页面 favicon 一致。
+// 生成 PWA 图标（public/icons/）：由 public/icons/icon.svg 渲染 180/192/512 三个尺寸。
+// 手绘风与饮食日记、同路同一套语言（天蓝底、墨色描边、三块积木叠过目标线）；页面 favicon 直接用 icon.svg。
 // 用法：node tools/build-icons.mjs（依赖本机 Chrome）
 import { chromium } from 'playwright-core';
-import { mkdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 
 const OUT = new URL('../public/icons/', import.meta.url);
-mkdirSync(OUT, { recursive: true });
+const svg = readFileSync(new URL('icon.svg', OUT), 'utf8');
 const browser = await chromium.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 });
 const page = await browser.newPage();
 for (const size of [180, 192, 512]) {
   await page.setViewportSize({ width: size, height: size });
-  // 图标主体留在中间 ~60% 内，maskable 裁切（安全区 80% 圆）也不会切到
-  await page.setContent(`<html><body style="margin:0;width:${size}px;height:${size}px;
-    background:#7ec8e3;display:flex;align-items:center;justify-content:center">
-    <span style="font-size:${Math.round(size * 0.58)}px;line-height:1">🧸</span></body></html>`);
+  await page.setContent(`<html><body style="margin:0">${svg.replace('width="512" height="512"', `width="${size}" height="${size}"`)}</body></html>`);
   await page.screenshot({ path: new URL(`icon-${size}.png`, OUT).pathname });
 }
 await browser.close();

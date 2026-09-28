@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 与饮食日记同一套手绘语言：天蓝底、墨色描边、平涂块面；三块歪歪的积木叠过虚线目标线 -->
+  <rect width="512" height="512" fill="#7EC8E3"/>
+  <!-- 主体收进 90%：安卓把图标裁成圆形时，地面两端和星星不会被切掉 -->
+  <g transform="translate(26 20) scale(0.9)">
+  <path d="M84 196H428" stroke="#2C2E2A" stroke-width="9" stroke-linecap="round" stroke-dasharray="22 20"/>
+  <path d="M74 424C120 396 196 386 262 388C334 390 404 400 442 426C446 452 420 470 380 474C300 480 200 480 124 474C88 470 68 450 74 424Z" fill="#8ED462" stroke="#2C2E2A" stroke-width="10" stroke-linejoin="round"/>
+  <g transform="rotate(-2 256 370)">
+    <path d="M146 334C216 328 296 328 366 334L362 412C290 418 216 418 150 414Z" fill="#F26B5B" stroke="#2C2E2A" stroke-width="11" stroke-linejoin="round"/>
+  </g>
+  <g transform="rotate(4 258 292)">
+    <path d="M180 254C232 248 288 248 338 254L334 332C284 336 232 336 182 332Z" fill="#FFD23F" stroke="#2C2E2A" stroke-width="11" stroke-linejoin="round"/>
+  </g>
+  <g transform="rotate(-7 258 210)">
+    <path d="M206 168C242 162 278 162 312 168L310 252C276 256 240 256 208 252Z" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="11" stroke-linejoin="round"/>
+    <circle cx="238" cy="204" r="8" fill="#2C2E2A"/>
+    <circle cx="280" cy="204" r="8" fill="#2C2E2A"/>
+    <path d="M240 226C250 236 268 236 278 226" fill="none" stroke="#2C2E2A" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <path d="M398 70L410 96L438 98L416 116L424 144L398 128L372 144L380 116L358 98L386 96Z" fill="#FFFFFF" stroke="#2C2E2A" stroke-width="9" stroke-linejoin="round"/>
+  </g>
+</svg>

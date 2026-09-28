@@ -118,6 +118,53 @@ function distanceTransform(mask, w, h) {
 // 先对原始像素轮廓做 Chaikin（只磨掉 1px 锯齿），再简化——反过来会把洞的直角切成大斜角
 const smooth = (ring) => simplify(chaikin(ring), SIMPLIFY_RAW * 0.7);
 
+/**
+ * 底部找平：毛笔楷书的竖钩常比另一侧的腿长（「雨」约 12%），平放时只有钩尖着地、字总是歪着，
+ * 叠上去的块会慢慢滑倒（用户反馈「雨」反复抖动停不稳，选择「把过长的竖钩修短」）。
+ * 取全字最低点，再取重心另一侧的最低点，把两者之间高出的部分从字形上裁掉——画面与碰撞同时修，保持一致。
+ * 高差 <1% 字高不动；需裁 >15% 字高则跳过（结构不适合，保留原字形）。
+ */
+function levelFeet(mask, w, h, ch) {
+  let minY = h;
+  let maxY = -1;
+  let sx = 0;
+  let n = 0;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++)
+      if (mask[y * w + x]) {
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+        sx += x;
+        n++;
+      }
+  const cx = sx / n;
+  const H = maxY - minY;
+  // 每列最低实心像素
+  const bottom = new Int32Array(w).fill(-1);
+  for (let x = 0; x < w; x++)
+    for (let y = h - 1; y >= 0; y--)
+      if (mask[y * w + x]) {
+        bottom[x] = y;
+        break;
+      }
+  let lowX = 0;
+  for (let x = 0; x < w; x++) if (bottom[x] > bottom[lowX]) lowX = x;
+  // 重心另一侧的最低点
+  let opp = -1;
+  for (let x = 0; x < w; x++) if ((x - cx) * (lowX - cx) < 0 && bottom[x] > opp) opp = bottom[x];
+  if (opp < 0) return mask;
+  const cut = maxY - opp;
+  if (cut <= H * 0.01) return mask;
+  if (cut > H * 0.15) {
+    console.log(`  ⚠ ${ch}: 两侧着地高差 ${((cut / H) * 100).toFixed(1)}% 过大，不找平`);
+    return mask;
+  }
+  const out = mask.slice();
+  for (let y = opp + 1; y < h; y++) out.fill(0, y * w, (y + 1) * w);
+  console.log(`  ${ch}: 底部找平，裁掉 ${((cut / H) * 100).toFixed(1)}% 字高`);
+  return out;
+}
+
 // ---------- 主流程 ----------
 
 const browser = await chromium.launch({
@@ -154,8 +201,8 @@ for (const a of LIST) {
     },
     { ch: a.ch, size: RASTER }
   );
-  const mask = Uint8Array.from(Buffer.from(maskStr, 'base64'));
   const W = RASTER;
+  const mask = levelFeet(Uint8Array.from(Buffer.from(maskStr, 'base64')), W, W, a.ch);
 
   // 笔画块
   const { label, sizes } = labelComponents(mask, W, W);

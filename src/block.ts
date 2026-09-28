@@ -6,6 +6,11 @@ import { sfx } from './sfx';
 
 const MAX_FALL_SPEED = 15;
 const DEBUG_PHYS = new URLSearchParams(location.search).has('debug');
+/**
+ * 汉字块额外转动惯量倍率：毛笔楷书横画向右上斜、「门」由三块散笔组成，叠上去一碰就整块转翻、
+ * 久久停不稳（用户反馈「雨」抖动）。实测对正叠放 ×2：门平均落稳 6.7→4.1s、雨 5.1→4.0s；×3 无进一步改善
+ */
+const CHAR_INERTIA = 2;
 
 /** 随关卡递进的物理难度参数 */
 export interface PhysProfile {
@@ -78,7 +83,7 @@ export class Block {
       body = Matter.Bodies.fromVertices(x, y, [Matter.Vertices.hull(verts)], opts);
     }
     // 低关卡加大转动惯量帮小朋友稳住，高关卡逐渐回落增加晃动
-    Matter.Body.setInertia(body, body.inertia * prof.inertiaScale);
+    Matter.Body.setInertia(body, body.inertia * prof.inertiaScale * (p.parts ? CHAR_INERTIA : 1));
     scene.matter.world.add(body);
     this.body = body;
 

@@ -25,14 +25,14 @@ const FLAT_ZONE = 0.04;
 // 对照表确认眼睛落在头部后逐个覆盖）；px: 目标最大边长（对标省份 130-300 分布）
 const LIST = [
   { id: 'cat', name: '小猫', color: '#FF8A65', px: 200, file: 'cat-81e1f778.svg', face: [0.84, 0.38], er: 12 },
-  { id: 'dog', name: '小狗', color: '#BCAAA4', px: 210, file: 'dog-d3e8133c.svg', face: [0.42, 0.12], er: 12 },
+  { id: 'dog', name: '小狗', color: '#BCAAA4', px: 210, file: 'dog-d3e8133c.svg', face: [0.68, 0.14], er: 12 },
   { id: 'rabbit', name: '兔子', color: '#F48FB1', px: 200, file: 'rabbit-d71fcd12.svg', face: [0.3, 0.4], er: 12 },
-  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-4b1f7a58.svg', face: [0.3, 0.18], er: 13, patch: true },
+  { id: 'panda', name: '大熊猫', color: '#FFF8EC', px: 245, file: 'panda-4b1f7a58.svg', face: [0.6, 0.16], er: 13, patch: true },
   { id: 'tiger', name: '老虎', color: '#FFA726', px: 250, file: 'tiger-a02b9a9a.svg', face: [0.13, 0.3], er: 12 },
   { id: 'lion', name: '狮子', color: '#FFCA28', px: 250, file: 'lion-78dbe564.svg', face: [0.14, 0.22], er: 11 },
   { id: 'elephant', name: '大象', color: '#9FA8DA', px: 265, file: 'elephant-910d853a.svg', face: [0.25, 0.3], er: 14 },
   { id: 'giraffe', name: '长颈鹿', color: '#FFB74D', px: 285, file: 'giraffe-b35f867d.svg', face: [0.15, 0.06], er: 8 },
-  { id: 'monkey', name: '小猴子', color: '#A1887F', px: 215, file: 'monkey-4e9c5666.svg', face: [0.1, 0.47], er: 6 },
+  { id: 'monkey', name: '小猴子', color: '#A1887F', px: 215, file: 'monkey-4e9c5666.svg', face: [0.93, 0.25], er: 6 },
   { id: 'chick', name: '公鸡', color: '#FFEE58', px: 185, file: 'chick-2de1c95c.svg', face: [0.2, 0.15], er: 10 },
   { id: 'duck', name: '鸭子', color: '#FFD54F', px: 190, file: 'duck-97f833ff.svg', face: [0.2, 0.25], er: 10 },
   { id: 'goose', name: '大白鹅', color: '#81D4FA', px: 230, file: 'goose-9e1e3fd7.svg', face: [0.2, 0.1], er: 8 },
@@ -51,13 +51,13 @@ const LIST = [
   { id: 'penguin', name: '企鹅', color: '#78909C', px: 210, file: 'penguin-f2e02022.svg', face: [0.45, 0.1], er: 10 },
   { id: 'kangaroo', name: '袋鼠', color: '#FF7043', px: 240, file: 'kangaroo-0760b69c.svg', face: [0.85, 0.1], er: 9 },
   { id: 'camel', name: '骆驼', color: '#D9B380', px: 260, file: 'camel-b41ebd3e.svg', face: [0.12, 0.15], er: 9 },
-  { id: 'hedgehog', name: '刺猬', color: '#A9927B', px: 190, file: 'hedgehog-baa41c61.svg', face: [0.78, 0.6], er: 8 },
+  { id: 'hedgehog', name: '刺猬', color: '#A9927B', px: 190, file: 'hedgehog-baa41c61.svg', face: [0.86, 0.56], er: 8 },
   { id: 'squirrel', name: '小松鼠', color: '#E59866', px: 205, file: 'squirrel-23c700c9.svg', face: [0.72, 0.3], er: 10 },
-  { id: 'snail', name: '蜗牛', color: '#AED581', px: 185, file: 'snail-d8f236a7.svg', face: [0.75, 0.45], er: 8 },
+  { id: 'snail', name: '蜗牛', color: '#AED581', px: 185, file: 'snail-d8f236a7.svg', face: [0.88, 0.66], er: 8 },
   { id: 'crab', name: '螃蟹', color: '#EF5350', px: 225, file: 'crab-7197c71a.svg', face: [0.5, 0.5], er: 13 },
   { id: 'dino', name: '小恐龙', color: '#66BB6A', px: 280, file: 'dino-2003b4f6.svg', face: [0.14, 0.05], er: 6 },
   { id: 'croc', name: '鳄鱼', color: '#26A69A', px: 260, file: 'croc-2fa0c118.svg', face: [0.5, 0.12], er: 7 },
-  { id: 'mouse', name: '小老鼠', color: '#F9A825', px: 160, file: 'mouse-36dc0476.svg', face: [0.62, 0.28], er: 9 },
+  { id: 'mouse', name: '小老鼠', color: '#F9A825', px: 160, file: 'mouse-36dc0476.svg', face: [0.77, 0.33], er: 9 },
 ];
 
 // ---------- 几何工具（与 build-provinces.mjs 同实现） ----------
